@@ -1,0 +1,254 @@
+/** Button bar */
+
+#buttonBar {
+  padding: 0.5rem;
+  border-bottom: 2px lightgray solid;
+  display: flex;
+}
+
+#buttonBar > button,
+#buttonBar > .dropdown {
+  margin-right: 0.5rem;
+  display: inline-block;
+}
+
+#schemaEditingState {
+  display: inline-flex;
+  margin-left: 1rem;
+  font-size: 14pt;
+}
+
+#schemaEditingState > * {
+  margin: auto;
+}
+
+#schemaEditingButton {
+  display: inline-flex;
+  margin-left: 0.5rem;
+  width: 3rem;
+  font-size: 14pt;
+  position: relative;
+}
+
+#schemaEditingSpinner {
+  margin: auto;
+}
+
+#schemaEditingState .custom-switch .custom-control-label::before {
+  width: 2.5rem;
+  height: 1.5rem;
+  border-radius: 0.75rem;
+}
+
+#schemaEditingState .custom-switch .custom-control-label::after {
+  top: calc(0.25rem + 2px);
+  left: calc(-2.25rem + 2px);
+  width: calc(1.5rem - 4px);
+  height: calc(1.5rem - 4px);
+  border-radius: 0.75rem;
+}
+
+#schemaEditingState
+  .custom-switch
+  .custom-control-input:checked
+  ~ .custom-control-label::after {
+  transform: translateX(1rem);
+}
+
+#schemaEditingState > form {
+  margin-left: 0.3rem;
+  margin-right: -0.5rem;
+}
+
+#schemaSaveState {
+  display: contents;
+  width: 100px;
+  font-size: 14pt;
+  color: #888;
+}
+
+#schemaSaveState > * {
+  margin: auto;
+}
+
+#schemaSaveStateIcon {
+  width: 2rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+#schemaSaveStateLabel {
+  width: 10rem;
+  text-align: left;
+}
+
+#schemaSaveStateIcon .spinner-border {
+  height: 1.1em;
+  width: 1.1em;
+}
+
+#buttonBarSpacer {
+  display: inline-flex;
+  flex-grow: 1;
+}
+
+/** Toast container */
+
+.Toastify__toast {
+  color: black;
+  cursor: inherit;
+  overflow-y: auto;
+  max-height: 70vh;
+  font: monospace;
+  font-size: 12pt;
+}
+
+.Toastify__toast-container {
+  width: inherit;
+}
+
+.Toastify__close-button {
+  color: black;
+}
+
+.Toastify__toast--warning {
+  background: rgb(255, 200, 100);
+}
+
+.Toastify__toast--success {
+  background: lightgreen;
+}
+
+.Toastify__toast--error {
+  background: lightcoral;
+}
+
+.Toastify__toast--info {
+  background: lightblue;
+}
+
+/** Miscellaneous */
+
+.diagram-component {
+  float: unset;
+}
+
+#appLoaderDefault {
+  width: 100vw;
+  line-height: 100vh;
+  text-align: center;
+  font-size: 24pt;
+}
+
+#diagramPlaceholder {
+  flex-grow: 1;
+  color: gray;
+  text-align: center;
+  margin-top: 4em;
+  font-size: 24pt;
+}
+
+.diagram-component {
+  box-shadow: 0 0 1px black;
+  width: 100%;
+  height: 100%;
+  float: left;
+}
+
+:focus {
+  /* Does this harm accessibility? */
+  outline: none;
+}
+
+/* Allotment */
+
+#root {
+  height: 100vh;
+}
+
+#topLeftDiv {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.split-view-view {
+  display: flex;
+}
+
+/* JSON View */
+
+#reactJsonContainer {
+  overflow-y: auto;
+  font-size: 9pt;
+  padding: 0 1em;
+  font-family: monospace;
+  height: 100%;
+}
+
+/*
+#reactJsonContainer :firstChild {
+  background-color: white;
+}
+*/
+
+.jsonLinkButton {
+  margin-left: 0.4em;
+  font-family: sans-serif;
+  padding: 0px 2px !important;
+  font-size: 8pt !important;
+}
+
+/* React Flow Style */
+
+:root {
+  --translate-duration: 0.3s;
+}
+
+.react-flow__edge-textwrapper,
+.react-flow__node {
+  transition: transform var(--translate-duration);
+}
+
+.react-flow__node-entity,
+.react-flow__node-event {
+  z-index: -100 !important;
+}
+
+.react-flow__node-nodeBackground {
+  z-index: -9000 !important;
+}
+
+.react-flow__edge-path {
+  transition: var(--translate-duration);
+  stroke: black;
+}
+
+.nodeBackground {
+  background-color: #eeeeee;
+  transition:
+    transform var(--translate-duration),
+    width var(--translate-duration),
+    height var(--translate-duration);
+  display: block;
+  vertical-align: middle;
+  text-align: center;
+  color: gray;
+  z-index: -1000 !important;
+}
+
+[data-radix-popper-content-wrapper] {
+  z-index: 1000 !important;
+}
+
+#diagramToolTip {
+  position: absolute;
+  z-index: 999;
+  font-size: 8pt;
+  border: 1px solid gray;
+  border-radius: 3px;
+  white-space: nowrap;
+  padding: 0 2px;
+  background-color: white;
+}

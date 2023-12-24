@@ -1,0 +1,13 @@
+[Unit]
+Description=KAIROS schema editing web server
+Requires=docker.service
+
+[Service]
+Type=exec
+Restart=always
+ExecStart=/usr/bin/docker compose up
+# You will probably want to edit this
+WorkingDirectory=/tmp/openera
+
+[Install]
+WantedBy=multi-user.target

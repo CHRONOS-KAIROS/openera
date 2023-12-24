@@ -1,0 +1,541 @@
+{
+  "events": {
+    "FWD_Q3702971": {
+      "name": "personal_data",
+      "wd_node": "Q3702971",
+      "wd_description": "any piece of information about a person that is not publicly known, or that allows identification of that person",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A0_pag_entity_pertaining",
+          "short_name": "A0_pag",
+          "constraints": []
+        },
+        {
+          "name": "A1_ppt_pertaining_to",
+          "short_name": "A1_ppt",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q290": {
+      "name": "sex",
+      "wd_node": "Q290",
+      "wd_description": "trait that determines an individual's sexually reproductive function",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A0_pag_person",
+          "short_name": "A0_pag",
+          "constraints": []
+        },
+        {
+          "name": "A1_ppt_sex",
+          "short_name": "A1_ppt",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q185836": {
+      "name": "age_of_a_person",
+      "wd_node": "Q185836",
+      "wd_description": "time elapsed since a person was born",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A0_pag_person",
+          "short_name": "A0_pag",
+          "constraints": []
+        },
+        {
+          "name": "A1_numeric",
+          "short_name": "A1_numeric",
+          "constraints": []
+        },
+        {
+          "name": "A2_time",
+          "short_name": "A2_time",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q188952": {
+      "name": "medical_history",
+      "wd_node": "Q188952",
+      "wd_description": "information gained by a physician by asking specific questions, with the aim of obtaining information useful in formulating a diagnosis and providing medical care",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A0_ppt_entity_showing_symptoms",
+          "short_name": "A0_ppt",
+          "constraints": []
+        },
+        {
+          "name": "A1_ppt_symptoms_of_what",
+          "short_name": "A1_ppt",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q177719": {
+      "name": "medical_diagnosis",
+      "wd_node": "Q177719",
+      "wd_description": "process to determine or identify a disease or disorder, which would account for a person's symptoms and signs",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A0_pag_doctor",
+          "short_name": "A0_pag",
+          "constraints": []
+        },
+        {
+          "name": "A1_ppt_patient",
+          "short_name": "A1_ppt",
+          "constraints": []
+        },
+        {
+          "name": "A2_prd_illness",
+          "short_name": "A2_prd",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q1441305": {
+      "name": "clinical_sign",
+      "wd_node": "Q1441305",
+      "wd_description": "objective indication of a medical fact or characteristic of a disease, injury, or abnormal physiological state that may be detected during the physical examination of a patient",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A0_pag_shower",
+          "short_name": "A0_pag",
+          "constraints": []
+        },
+        {
+          "name": "A1_ppt_thing_seen/shown",
+          "short_name": "A1_ppt",
+          "constraints": []
+        },
+        {
+          "name": "A2_gol_seer",
+          "short_name": "A2_gol",
+          "constraints": []
+        },
+        {
+          "name": "A3_vsp_subject-matter_of_the_signals",
+          "short_name": "A3_vsp",
+          "constraints": []
+        },
+        {
+          "name": "AM_body_loc",
+          "short_name": "AM_body",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q2671652": {
+      "name": "medical_test",
+      "wd_node": "Q2671652",
+      "wd_description": "medical procedure performed to detect, diagnose, or monitor diseases, disease processes, susceptibility, or to determine a course of treatment",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A0_pag_examiner",
+          "short_name": "A0_pag",
+          "constraints": []
+        },
+        {
+          "name": "A1_loc_examined",
+          "short_name": "A1_loc",
+          "constraints": []
+        },
+        {
+          "name": "A2_ppt_in_search_of",
+          "short_name": "A2_ppt",
+          "constraints": []
+        },
+        {
+          "name": "A3_prd_test_result_numeric",
+          "short_name": "A3_prd",
+          "constraints": []
+        },
+        {
+          "name": "A4_prd_test_result_unit",
+          "short_name": "A4_prd",
+          "constraints": []
+        },
+        {
+          "name": "A5_prd_test_result_range",
+          "short_name": "A5_prd",
+          "constraints": []
+        },
+        {
+          "name": "A6_prd_test_result_description",
+          "short_name": "A6_prd",
+          "constraints": []
+        },
+        {
+          "name": "AM_body_loc",
+          "short_name": "AM_body",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q106161654": {
+      "name": "immune_challenge",
+      "wd_node": "Q106161654",
+      "wd_description": "something which triggers the need of action by the immune system",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A0_pag_causer",
+          "short_name": "A0_pag",
+          "constraints": []
+        },
+        {
+          "name": "A1_ppt_thing_provoked",
+          "short_name": "A1_ppt",
+          "constraints": []
+        },
+        {
+          "name": "A2_prd_secondary_impelled_agent",
+          "short_name": "A2_prd",
+          "constraints": []
+        },
+        {
+          "name": "AM_loc",
+          "short_name": "AM_loc",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q29914073": {
+      "name": "drug_administration",
+      "wd_node": "Q29914073",
+      "wd_description": "to give drug or medication",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A0_pag_doctor",
+          "short_name": "A0_pag",
+          "constraints": []
+        },
+        {
+          "name": "A1_gol_patient",
+          "short_name": "A1_gol",
+          "constraints": []
+        },
+        {
+          "name": "A2_ppt_medication",
+          "short_name": "A2_ppt",
+          "constraints": []
+        },
+        {
+          "name": "A3_cau_illness",
+          "short_name": "A3_cau",
+          "constraints": []
+        },
+        {
+          "name": "AM_loc",
+          "short_name": "AM_loc",
+          "constraints": []
+        },
+        {
+          "name": "A4_dose_numeric",
+          "short_name": "A4_dose",
+          "constraints": []
+        },
+        {
+          "name": "A5_dose_unit_of_measurement",
+          "short_name": "A5_dose",
+          "constraints": []
+        },
+        {
+          "name": "A6_frequency_numeric",
+          "short_name": "A6_frequency",
+          "constraints": []
+        },
+        {
+          "name": "A7_frequency_unit_of_time",
+          "short_name": "A7_frequency",
+          "constraints": []
+        },
+        {
+          "name": "A8_frequency_description",
+          "short_name": "A8_frequency",
+          "constraints": []
+        },
+        {
+          "name": "A9_route_of_administration",
+          "short_name": "A9_route",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q11516357": {
+      "name": "adverse_event",
+      "wd_node": "Q11516357",
+      "wd_description": "bad outcome during experimental treatment",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A1_ppt_event",
+          "short_name": "A1_ppt",
+          "constraints": []
+        },
+        {
+          "name": "A2_gol_benefactive",
+          "short_name": "A2_gol",
+          "constraints": []
+        },
+        {
+          "name": "AM_loc",
+          "short_name": "AM_loc",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q4": {
+      "name": "death",
+      "wd_node": "Q4",
+      "wd_description": "permanent cessation of vital functions",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A1_ppt_the_deceased",
+          "short_name": "A1_ppt",
+          "constraints": []
+        },
+        {
+          "name": "A2_cau_cause_or_disease",
+          "short_name": "A2_cau",
+          "constraints": []
+        },
+        {
+          "name": "AM_loc_location",
+          "short_name": "AM_loc",
+          "constraints": []
+        },
+        {
+          "name": "AM_cau_cause",
+          "short_name": "AM_cau",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q12131": {
+      "name": "disability",
+      "wd_node": "Q12131",
+      "wd_description": "impairments, activity limitations, and participation restrictions",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A1_ppt_disabled_one",
+          "short_name": "A1_ppt",
+          "constraints": []
+        },
+        {
+          "name": "A2_cau_cause_or_disease",
+          "short_name": "A2_cau",
+          "constraints": []
+        },
+        {
+          "name": "AM_cau_cause",
+          "short_name": "AM_cau",
+          "constraints": []
+        },
+        {
+          "name": "AM_loc_location",
+          "short_name": "AM_loc",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q6073720": {
+      "name": "Irreparable_injury",
+      "wd_node": "Q6073720",
+      "wd_description": "term in equity",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A0_ppt_agent",
+          "short_name": "A0_ppt",
+          "constraints": []
+        },
+        {
+          "name": "A1_ppt_injured_entity",
+          "short_name": "A1_ppt",
+          "constraints": []
+        },
+        {
+          "name": "A2_mnr_instrument",
+          "short_name": "A2_mnr",
+          "constraints": []
+        },
+        {
+          "name": "AM_cau_cause_or_disease",
+          "short_name": "AM_cau",
+          "constraints": []
+        },
+        {
+          "name": "AM_body_loc",
+          "short_name": "AM_body",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q65807521": {
+      "name": "critical_illness",
+      "wd_node": "Q65807521",
+      "wd_description": "disease or state in which death is possible or imminent",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A1_ppt_sick/ill_one",
+          "short_name": "A1_ppt",
+          "constraints": []
+        },
+        {
+          "name": "A2_cau_cause_or_disease",
+          "short_name": "A2_cau",
+          "constraints": []
+        },
+        {
+          "name": "AM_cau_cause",
+          "short_name": "AM_cau",
+          "constraints": []
+        },
+        {
+          "name": "AM_loc",
+          "short_name": "AM_loc",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q3140971": {
+      "name": "hospitalization",
+      "wd_node": "Q3140971",
+      "wd_description": "admission of a patient to a hospital",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A0_pag_sender",
+          "short_name": "A0_pag",
+          "constraints": []
+        },
+        {
+          "name": "A1_ppt_injured/ill_entity",
+          "short_name": "A1_ppt",
+          "constraints": []
+        },
+        {
+          "name": "AM_loc",
+          "short_name": "AM_loc",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q727096": {
+      "name": "congenital_disorder",
+      "wd_node": "Q727096",
+      "wd_description": "condition present at birth regardless of cause; human disease or disorder developed prior to birth",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A1_ppt_sick/ill_one",
+          "short_name": "A1_ppt",
+          "constraints": []
+        },
+        {
+          "name": "A2_cau_cause_or_disease",
+          "short_name": "A2_cau",
+          "constraints": []
+        },
+        {
+          "name": "AM_cau_cause",
+          "short_name": "AM_cau",
+          "constraints": []
+        },
+        {
+          "name": "AM_body_loc",
+          "short_name": "AM_body",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q4014799": {
+      "name": "medical_visit",
+      "wd_node": "Q4014799",
+      "wd_description": "meeting between physician and patient",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A0_pag_consulter",
+          "short_name": "A0_pag",
+          "constraints": []
+        },
+        {
+          "name": "A1_com_consulted_with",
+          "short_name": "A1_com",
+          "constraints": []
+        },
+        {
+          "name": "A2_ppt_in_regards_to",
+          "short_name": "A2_ppt",
+          "constraints": []
+        },
+        {
+          "name": "AM_loc",
+          "short_name": "AM_loc",
+          "constraints": []
+        }
+      ]
+    },
+    "FWD_Q99496317": {
+      "name": "withdrawal",
+      "wd_node": "Q99496317",
+      "wd_description": "act that ends a situation prematurely, taken by the party that initiated it",
+      "type": "event_type",
+      "curated_by": "Sue Holm",
+      "arguments": [
+        {
+          "name": "A0_pag_entity_removing",
+          "short_name": "A0_pag",
+          "constraints": []
+        },
+        {
+          "name": "A1_ppt_thing_being_withdrawn",
+          "short_name": "A1_ppt",
+          "constraints": []
+        },
+        {
+          "name": "A2_dir_removed_from",
+          "short_name": "A2_dir",
+          "constraints": []
+        },
+        {
+          "name": "AM_loc",
+          "short_name": "AM_loc",
+          "constraints": []
+        }
+      ]
+    }
+  }
+}

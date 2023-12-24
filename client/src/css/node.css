@@ -1,0 +1,248 @@
+:root {
+  --entity-bg-color: #f6f6f6;
+  --event-bg-color: hsl(223, 100%, 90%);
+  --event-bg-color-graphg: hsl(41, 100%, 90%);
+  --event-bg-color-not-predicted: #f8f8f8;
+  --event-bg-color-matched: hsl(334, 81%, 90%);
+  --entity-bg-color-matched: hsl(334, 81%, 90%);
+  --event-bg-color-subschema: hsl(41, 100%, 90%);
+}
+
+.entityNode.schemaArg,
+.participantFiller.schemaArg {
+  background-color: var(--entity-bg-color-matched);
+}
+
+.eventNode.subschemaNode,
+.participantFiller.subschemaNode {
+  background-color: var(--event-bg-color-subschema);
+}
+
+.participantFiller.nodeMatched,
+.eventNode.nodeMatched,
+.entityNode.nodeMatched {
+  background-color: var(--event-bg-color-matched);
+}
+
+.participantFiller.nodeNotPredicted,
+.eventNode.nodeNotPredicted,
+.entityNode.nodePredicted {
+  background-color: var(--event-bg-color-not-predicted);
+}
+
+.participantFiller.nodePredicted,
+.eventNode.nodePredicted,
+.entityNode.nodePredicted {
+  background-color: var(--event-bg-color);
+}
+
+.participantFiller.nodeGraphg,
+.eventNode.nodeGraphg,
+.entityNode.nodeGraphg {
+  background-color: var(--event-bg-color-graphg);
+}
+
+.eventNode.participantFiller,
+.eventNode {
+  background-color: var(--event-bg-color);
+}
+
+.entityNode.participantFiller,
+.entityNode {
+  background-color: var(--entity-bg-color);
+}
+
+.entityNode.nodeBody {
+  max-width: 180px;
+}
+
+.nodeBody {
+  font-size: 10pt;
+  border: 1px solid gray;
+  padding: 2pt 4pt;
+  max-width: 350px;
+  overflow-wrap: break-word;
+  /*
+  word-break: break-all;
+  transition: padding 0.03s steps(4);
+  */
+  cursor: pointer;
+  position: relative;
+}
+
+.childrenGate {
+  font-size: 8pt;
+  border: 1px solid gray;
+  border-left: 0;
+  padding: 0 2px;
+}
+
+.eventNodeContainer {
+  display: flex;
+  align-items: center;
+}
+
+.collapseButton {
+  background-color: white;
+  border: 1px solid gray;
+  text-align: center;
+  height: 1.2em;
+  border-radius: 10px;
+  width: 1.2em;
+  font-size: 8pt;
+}
+
+.collapseButton > * {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.participantFiller {
+  background-color: var(--entity-bg-color);
+  border: 1px solid black;
+}
+
+.participantFiller {
+  padding: 0.3em;
+  display: inline-block;
+  margin-right: 0.5em;
+  z-index: 20;
+  position: relative;
+}
+
+.newEdgeButton {
+  color: gray;
+  border: 1px solid gray;
+  font-size: 8pt;
+  padding: 0.1em 0.3em;
+  display: inline-block;
+  margin-left: 0.5em;
+  z-index: 20;
+  position: relative;
+  background-color: white;
+}
+.newEdgeButton:hover {
+  filter: brightness(90%);
+  cursor: pointer;
+}
+
+.particpantTable {
+  text-align: left;
+  margin-top: 0.5em;
+  word-break: break-word;
+  border-spacing: 0.2em;
+  border-collapse: separate;
+}
+
+.particpantTable tr {
+}
+
+.particpantTable td:first-child {
+  text-align: right;
+  word-break: normal;
+}
+
+.particpantTable td:nth-child(2) {
+  font-family: monospace;
+  font-size: 8pt;
+}
+
+.eventExpandedInfo {
+  color: #444;
+  background-color: white;
+  padding: 0.5em;
+  border: 1px solid lightgray;
+  font-size: 9pt;
+  line-height: 1;
+  margin: 0.5em 0;
+}
+
+.clickable:hover {
+  filter: brightness(95%);
+  cursor: pointer;
+}
+
+.editButton {
+  margin-left: 0.3em;
+  border: 1px solid;
+  height: 1em;
+  width: 1em;
+  /*
+  */
+  padding: 0.2ex !important;
+  background-color: lightyellow;
+}
+
+.editButton > svg {
+  height: 0.6em;
+
+  margin: 0;
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.react-flow__handle {
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  transform: translate(0, 0);
+  min-height: 0;
+  min-width: 0;
+  background: gray;
+  z-index: 10;
+  border: none;
+}
+
+.react-flow__handle-bottom {
+  bottom: 0;
+}
+
+.react-flow__handle-top {
+  top: 0;
+}
+
+.react-flow__handle-right {
+  right: 0;
+}
+
+.react-flow__handle-left {
+  left: 0;
+}
+
+.fillToParent {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 0;
+  transform: none;
+  border: none;
+}
+
+.nodeBadge {
+  position: absolute;
+  font-size: 6pt;
+  border: 1px solid gray;
+  right: 0;
+  padding: 0 2px;
+  border-radius: 4px;
+}
+
+.ta2TypeBadge {
+  background-color: white;
+  top: 0;
+  transform: translate(50%, -50%);
+  white-space: nowrap;
+}
+
+.warningBadge {
+  background-color: #ffcc00;
+  bottom: 3px;
+  transform: translate(50%, 100%);
+  max-width: 100px;
+  line-height: 1;
+}

@@ -1,0 +1,28 @@
+diff --git a/node_modules/dagre/lib/order/index.js b/node_modules/dagre/lib/order/index.js
+index 4ac2d9f..b5024e5 100644
+--- a/node_modules/dagre/lib/order/index.js
++++ b/node_modules/dagre/lib/order/index.js
+@@ -33,23 +33,6 @@ function order(g) {
+ 
+   var layering = initOrder(g);
+   assignOrder(g, layering);
+-
+-  var bestCC = Number.POSITIVE_INFINITY,
+-    best;
+-
+-  for (var i = 0, lastBest = 0; lastBest < 4; ++i, ++lastBest) {
+-    sweepLayerGraphs(i % 2 ? downLayerGraphs : upLayerGraphs, i % 4 >= 2);
+-
+-    layering = util.buildLayerMatrix(g);
+-    var cc = crossCount(g, layering);
+-    if (cc < bestCC) {
+-      lastBest = 0;
+-      best = _.cloneDeep(layering);
+-      bestCC = cc;
+-    }
+-  }
+-
+-  assignOrder(g, best);
+ }
+ 
+ function buildLayerGraphs(g, ranks, relationship) {

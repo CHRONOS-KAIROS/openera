@@ -1,0 +1,585 @@
+# SDF 2.3 with modifications
+
+GenericSdfProperties:
+  _type: _record
+  _kwargs:
+    # Note: In SDF, can be an array of objects
+    privateData:
+      _optional: true
+      _type: _mapping
+      _args: [string, any]
+    comment:
+      _optional: true
+      _type: _array
+      _args: [string]
+
+HasWdNode:
+  _type: _record
+  _kwargs:
+    wd_node:
+      _type: _array
+      _args: [WdNode]
+    wd_label:
+      _type: _array
+      _args: [string]
+    wd_description:
+      _type: _array
+      _args: [string]
+
+HasWdNodeOptional:
+  _type: _record
+  _kwargs:
+    wd_node:
+      _optional: true
+      _type: _array
+      _args: [WdNode]
+    wd_label:
+      _optional: true
+      _type: _array
+      _args: [string]
+    wd_description:
+      _optional: true
+      _type: _array
+      _args: [string]
+
+DocumentId:
+  _type: _newtype
+  _args: [string]
+
+EventPrimitiveId:
+  _type: _newtype
+  _args: [string]
+
+InstanceId:
+  _type: _newtype
+  _args: [string]
+
+EntityId:
+  _type: _newtype
+  _args: [string]
+
+RelationId:
+  _type: _newtype
+  _args: [string]
+
+EventId:
+  _type: _newtype
+  _args: [string]
+
+ParticipantId:
+  _type: _newtype
+  _args: [string]
+
+ValueId:
+  _type: _newtype
+  _args: [string]
+
+WdNode:
+  _type: _newtype
+  _args: [string]
+
+ProvenanceDatumId:
+  _type: _newtype
+  _args: [string]
+
+AnyId:
+  _type: _union
+  _args:
+    - DocumentId
+    - EventPrimitiveId
+    - InstanceId
+    - EntityId
+    - RelationId
+    - EventId
+    - ParticipantId
+    - ValueId
+    - ProvenanceDatumId
+
+StringOrContextMapping:
+  _type: _union
+  _args: [string, JsonLdContextMapping]
+
+JsonLdContextArray:
+  _type: _array
+  _args: [StringOrContextMapping]
+
+JsonLdContextMapping:
+  _type: _mapping
+  _args: [string, any]
+
+JsonLdContext:
+  _type: _union
+  _args:
+    - JsonLdContextArray
+    - JsonLdContextMapping
+
+Document:
+  _type: _record
+  _intersection: [GenericSdfProperties]
+  _kwargs:
+    "@id": DocumentId
+    "@context": JsonLdContext
+    events:
+      _type: _array
+      _args: [Event]
+      _optional: true
+    ceID:
+      _type: string
+      _optional: true
+    entities:
+      _type: _array
+      _args: [Entity]
+      _optional: true
+    instances:
+      _optional: true
+      _type: _array
+      _args: [Instance]
+    provenanceData:
+      _optional: true
+      _type: _array
+      _args: [ProvenanceDatum]
+    relations:
+      _optional: true
+      _type: _array
+      _args: [Relation]
+    sdfVersion: string
+    ta2:
+      _type: boolean
+      _optional: true
+    task2:
+      _type: boolean
+      _optional: true
+    version: string
+
+Instance:
+  _type: _record
+  _kwargs:
+    "@id": InstanceId
+    name: string
+    confidence:
+      _optional: true
+      _type: number
+    description:
+      _optional: true
+      _type: string
+    entities:
+      _type: _array
+      _args: [Entity]
+    events:
+      _type: _array
+      _args: [Event]
+    relations:
+      _optional: true
+      _type: _array
+      _args: [Relation]
+    schemaInstantiations:
+      _optional: true
+      _type: _array
+      _args: [string]
+    ta1ref:
+      _optional: true
+      _type: _union
+      _args:
+        - EventId
+        - InstanceId
+        - RelationId
+
+EventEntityRelationId:
+  _type: _union
+  _args:
+    - EventId
+    - EntityId
+    - RelationId
+
+EventEntityId:
+  _type: _union
+  _args: [EventId, EntityId]
+
+Value:
+  _type: _record
+  _kwargs:
+    "@id": ValueId
+    confidence:
+      _optional: true # optional not in spec
+      _type: _array  # Not array in spec
+      _args: [number]
+    modality:
+      _optional: true
+      _type: Modality
+    provenance:
+      _type: _array
+      _args: [string]
+    ta2entity: EventEntityId
+
+Entity:
+  _type: _record
+  _intersection: [GenericSdfProperties, HasWdNodeOptional]
+  _kwargs:
+    "@id": EntityId
+    aka:
+      _optional: true
+      _type: _array
+      _args: [string]
+    centrality:
+      _optional: true
+      _type: number
+    name: string
+    reference:
+      _optional: true
+      _type: _array
+      _args: [string]
+    ta2wd_node:
+      _optional: true
+      _type: _array
+      _args: [WdNode]
+    ta2wd_label:
+      _optional: true
+      _type: _array
+      _args: [string]
+    ta2wd_description:
+      _optional: true
+      _type: _array
+      _args: [string]
+    origName:
+      _optional: true
+      _type: string
+    # Not in SDF spec
+    confidence:
+      _optional: true
+      _type: _array
+      _args: [number]
+
+ModalityValue:
+  _type: _literal_union
+  _args:
+    - generic
+    - hedged 
+    - irrealis 
+    - negated
+
+Modality:
+  _type: _array
+  _args: [ModalityValue]
+
+Aspect:
+  _type: _literal_union
+  _args:
+    - stat
+    - punct
+    - perf
+    - imperf
+    - iter
+    - incept
+    - unspec
+
+ProvenanceDatumGeneric:
+  _type: _record
+  _intersection: [GenericSdfProperties]
+  _kwargs:
+    # Not sure how to handle _array of provenances
+    # provenance: string | string[]
+    provenanceID: ProvenanceDatumId
+    # Not sure if it should be optional
+    childID: string
+    sourceURL:
+      _optional: true
+      _type: string
+    mediaType: string
+    parentIDs:
+      _type: _array
+      _args: [string]
+
+ProvenanceDatum:
+  _type: _union
+  _args:
+    - ProvenanceDatumText
+    - ProvenanceDatumVideo
+    - ProvenanceDatumAudio
+    - ProvenanceDatumImage
+
+ProvenanceDatumText:
+  _type: _record
+  _intersection: [ProvenanceDatumGeneric]
+  _kwargs:
+    length: number
+    offset: number
+
+ProvenanceDatumVideo:
+  _type: _record
+  _intersection: [ProvenanceDatumGeneric]
+  _kwargs:
+    boundingBox:
+      _optional: true
+      _type: _array
+      _args: [number]
+    endTime:
+      _optional: true
+      _type: number
+    keyframes:
+      _optional: true
+      _type: _array
+      _args: [number]
+    startTime:
+      _optional: true
+      _type: number
+
+ProvenanceDatumAudio:
+  _type: _record
+  _intersection: [ProvenanceDatumGeneric]
+  _kwargs:
+    endTime: number
+    startTime: number
+
+ProvenanceDatumImage:
+  _type: _record
+  _intersection: [ProvenanceDatumGeneric]
+  _kwargs:
+    boundingBox:
+      _type: _array
+      _args: [number]
+
+Relation:
+  _type: _record
+  _intersection: [GenericSdfProperties, HasWdNode]
+  _kwargs:
+    "@id": RelationId
+    ta1ref:
+      _type: EventEntityRelationId
+      _optional: true
+    centrality:
+      _optional: true
+      _type: number
+    confidence:
+      _optional: true
+      _type: number
+    modality:
+      _optional: true
+      _type: Modality
+    name:
+      _optional: true
+      _type: string
+    reference:
+      _optional: true
+      _type: _array
+      _args: [string]
+    relationObject:
+      _type: _array
+      _args: [EventEntityId]
+    relationObject_prov:
+      _optional: true
+      # Not sure if this should be a newtype
+      _type: string
+    relationProvenance:
+      _optional: true
+      _type: _array
+      _args: [string]
+    relationSubject: EventEntityId
+    relationSubject_prov:
+      _optional: true
+      _type: string
+    origName:
+      _optional: true
+      _type: string
+
+ChildrenGate:
+  _type: _literal_union
+  _args:
+    - and
+    - or
+    - xor
+
+Event:
+  _type: _record
+  _intersection: [GenericSdfProperties, HasWdNodeOptional]
+  _kwargs:
+    "@id": EventId
+    achieves:
+      _optional: true
+      _type: string
+    requires:
+      _optional: true
+      _type: string
+    aka:
+      _optional: true
+      _type: _array
+      _args: [string]
+    children:
+      _optional: true
+      _type: _array
+      _args: [Child]
+    confidence:
+      _optional: true
+      _type: _array  # Not array in spec
+      _args: [number]
+    description:
+      _optional: true
+      _type: string
+    goal:
+      _optional: true
+      _type: string
+    instanceOf:
+      _optional: true
+      _type: EventId
+    maxDuration:
+      _optional: true
+      _type: string
+    minDuration:
+      _optional: true
+      _type: string
+    modality:
+      _optional: true
+      _type: Modality
+    name: string
+    children_gate:
+      _optional: true
+      _type: ChildrenGate
+    # Forced _array
+    participants:
+      _optional: true
+      _type: _array
+      _args: [Participant]
+    provenance:
+      _optional: true
+      _type: _array
+      _args: [ProvenanceDatumId]
+    reference:
+      _optional: true
+      _type: _array
+      _args: [string]
+    relations:
+      _optional: true
+      _type: _array
+      _args: [Relation]
+    repeatable:
+      _optional: true
+      _type: boolean
+    ta1explanation:
+      _optional: true
+      _type: _array
+      _args: [string]
+    ta1ref:
+      _optional: true
+      _type: _union
+      _args:
+        - EventId
+        - InstanceId
+        - RelationId
+    temporal:
+      _optional: true
+      _type: _array
+      _args: [TemporalObject]
+    ta2wd_node:
+      _optional: true
+      _type: _array
+      _args: [WdNode]
+    ta2wd_label:
+      _optional: true
+      _type: _array
+      _args: [string]
+    ta2wd_description:
+      _optional: true
+      _type: _array
+      _args: [string]
+    predictionProvenance:
+      _optional: true
+      _type: _array
+      _args: [EventEntityRelationId]
+    isTopLevel:
+      _optional: true
+      _type: boolean
+    origDescription:
+      _optional: true
+      _type: string
+    origName:
+      _optional: true
+      _type: string
+    parent:
+      _optional: true
+      _type: EventId
+    subgroup_events:
+      _optional: true
+      _type: _array
+      _args: [EventId]
+    outlinks:
+      _optional: true
+      _type: _array
+      _args: [EventId]
+
+Child:
+  _type: _record
+  _intersection: [GenericSdfProperties]
+  _kwargs:
+    child: EventId
+    importance:
+      _optional: true
+      _type: number
+    optional:
+      _optional: true
+      _type: boolean
+    repeatable:
+      _optional: true
+      _type: boolean
+
+Participant:
+  _type: _record
+  _intersection: [GenericSdfProperties, HasWdNodeOptional]
+  _kwargs:
+    "@id": ParticipantId
+    entity: EventEntityId
+    reference:
+      _optional: true
+      _type: _array
+      _args: [string]
+    roleName: string
+    values:
+      _optional: true
+      _type: _array
+      _args: [Value]
+
+TemporalObject:
+  _type: _record
+  _intersection: [GenericSdfProperties]
+  _kwargs:
+    absoluteTime:
+      _optional: true
+      _type: string
+    confidence:
+      _optional: true
+      _type: number
+    duration:
+      _optional: true
+      _type: string
+    earliestEndTime:
+      _optional: true
+      _type: string
+    earliestStartTime:
+      _optional: true
+      _type: string
+    latestStartTime:
+      _optional: true
+      _type: string
+    latestEndTime:
+      _optional: true
+      _type: string
+    provenance:
+      _type: _array
+      _args: [ProvenanceDatumId]
+      _optional: true
+
+EventPrimitive:
+  _type: _record
+  _kwargs:
+    wd_node: WdNode
+    wd_label: string
+    wd_description: string
+    args:
+      # Different type of array since this is not json-ld?
+      _type: _array
+      _args: [EventArgument]
+    isSubschema: boolean
+
+EventArgument:
+  _type: _record
+  _kwargs:
+    name: string
+    fullName: string

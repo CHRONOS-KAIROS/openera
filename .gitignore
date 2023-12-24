@@ -1,0 +1,8 @@
+node_modules/
+*/__pycache__/
+.eslintcache
+/nginx/secret
+
+# We want this file tracked by git, but since is modified for each production
+# environment, we don't people accidentally comitting changes to it.
+/.env

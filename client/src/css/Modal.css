@@ -1,0 +1,112 @@
+body .modal-dialog {
+  max-width: 70%;
+}
+
+body .modal-content {
+  max-height: 90vh;
+}
+
+body .modal-body {
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body .parallelTables {
+  display: flex;
+  min-height: 0;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+body .table-responsive,
+.list-group {
+  overflow-y: auto;
+  flex-grow: 1;
+  display: inline-flex;
+}
+
+#linkDialog .table-responsive {
+  margin: 0 1rem;
+}
+
+#linkDialog thead {
+  position: sticky;
+  top: 0;
+  background: white;
+  font-weight: bold;
+}
+
+#linkDialog .searchTable tbody tr {
+  cursor: pointer;
+}
+
+body .tab-content {
+  overflow-y: hidden;
+  display: flex;
+}
+
+body .tab-content .tab-pane {
+  flex: 1 1 auto;
+}
+
+#linkDialog .table-striped tr.selectedItem {
+  background-color: lightblue;
+}
+
+#linkDialog .buttonBar {
+  margin-top: 1rem;
+  text-align: right;
+}
+
+.linkDialog td {
+  word-break: break-word;
+}
+
+body .flexTabPane {
+  display: flex;
+  height: 100%;
+  flex: 1 1 0;
+  flex-direction: column;
+  padding-top: 1rem;
+}
+
+#provenanceEditor .searchTable tbody tr {
+  cursor: pointer;
+}
+
+#provenanceEditor #provenanceDocText {
+  font-family: monospace;
+  border: 1px solid lightgray;
+  padding: 1em;
+  overflow-y: auto;
+}
+
+#provenanceEditor .tab-content {
+  overflow-y: auto;
+}
+
+#provenanceEditor #docViewHeader {
+  position: sticky;
+  top: 0;
+  padding: 1em;
+  border: 1px solid lightgray;
+  background: white;
+}
+
+#listEditor .input-group {
+  padding-bottom: 0.5em;
+}
+
+#listEditor .input-group-text:hover {
+  background-color: lightblue;
+  cursor: pointer;
+}
+
+#listEditor #buttonContainer {
+  text-align: right;
+}
+
+#listEditor.modal-dialog {
+  max-width: 500px;
+}

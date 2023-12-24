@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "sdf-types"
+version = "0.1.0"
+description = ""
+authors = ["Brendon Boldt <bboldt@cs.cmu.edu>"]
+packages = [
+  { include = "*" },
+]
+
+[tool.poetry.dependencies]
+black = "^22.8.0"
+python = "^3.9"
+PyYAML = "^6.0"
+types-PyYAML = "^6.0.12"
+
+[tool.poetry.dev-dependencies]
+mypy = "^1.4.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

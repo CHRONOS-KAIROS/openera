@@ -1,0 +1,22 @@
+version: "3.5"
+
+volumes:
+  persist: {}
+
+services:
+  api-server:
+    image: openera-api-server
+    volumes:
+      - persist:/app/fsdb
+    expose:
+      - 8000
+  client-server:
+    image: openera-client-server
+    volumes:
+      - ./nginx/secret/:/etc/nginx/secret
+    ports:
+      # Change the first 443 to a different porch if running locally without
+      # sudo
+      - 443:443
+    depends_on:
+      - api-server

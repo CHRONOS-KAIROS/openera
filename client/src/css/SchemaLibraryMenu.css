@@ -1,0 +1,59 @@
+#schemaNavHeader {
+  padding: 0.5rem 0 0.5rem 1rem;
+  border-bottom: 1px lightgray solid;
+}
+
+#schemaNavDiv {
+  border: 1px lightgray solid;
+  border-bottom: none;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+#schemaNavBody {
+  padding: 0.5em;
+  overflow-y: auto;
+}
+
+#schemaNavDiv tbody {
+  display: block;
+}
+
+#schemaNavTable .schemaName {
+  width: 100%;
+  cursor: pointer;
+  word-break: break-all;
+}
+
+#schemaNavTable .schemaNameSelected {
+  background: #d0f0ff;
+}
+
+.schemaNameUnselected:hover {
+  background: #eee;
+}
+
+#schemaNavTable .checkboxTd {
+  vertical-align: middle;
+  text-align: center;
+  line-height: 100%;
+}
+
+#schemaNavTable td {
+  padding: 0.25rem;
+}
+
+#schemaNavDiv .dropdown {
+  display: inline-block;
+}
+
+#schemaNavHeader .btn {
+  margin-right: 0.5em;
+  padding: 0 0.2rem;
+}
+
+#schemaNavTitle {
+  font-size: 20pt;
+  font-weight: bold;
+}
