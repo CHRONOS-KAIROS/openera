@@ -749,6 +749,17 @@ def get_wikidata_values(wd_node: str) -> Tuple[str, str]:
     return label, desc
 
 
+def update_induced_schemas(job_records: Any) -> None:
+    for rec in job_records:
+        if schema := rec["data"].get("sdf_data", None):
+            print(schema["@id"])
+            with do_transaction() as txn:
+                try:
+                    txn.write_new_schema(schema)
+                except sqlite3.IntegrityError:
+                    pass
+
+
 def dump_sdf(
     obj: sdf.Document, fp: IO[str], *, indent: int | None = DEFAULT_JSON_INDENT
 ) -> None:

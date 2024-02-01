@@ -35,6 +35,8 @@ const PathPropsBaseEdge = (props: PathPropsBaseEdgeProps) => {
   const interactionWidth = isNumeric(props.interactionWidth)
     ? props.interactionWidth
     : 20;
+  const interactionPathProps = { ...props.pathProps };
+  (interactionPathProps as any).strokeDasharray = undefined;
   return (
     <>
       <path
@@ -54,7 +56,7 @@ const PathPropsBaseEdge = (props: PathPropsBaseEdgeProps) => {
           strokeOpacity={0}
           strokeWidth={interactionWidth}
           className="react-flow__edge-interaction"
-          {...props.pathProps}
+          {...interactionPathProps}
         />
       )}
       {props.label && isNumeric(props.labelX) && isNumeric(props.labelY) ? (
@@ -67,6 +69,7 @@ const PathPropsBaseEdge = (props: PathPropsBaseEdgeProps) => {
           labelBgStyle={props.labelBgStyle}
           labelBgPadding={props.labelBgPadding}
           labelBgBorderRadius={props.labelBgBorderRadius}
+          onContextMenu={props.pathProps.onContextMenu}
         />
       ) : null}
     </>

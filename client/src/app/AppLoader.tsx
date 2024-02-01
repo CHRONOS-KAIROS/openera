@@ -18,8 +18,6 @@ import { Server } from "./Server";
 import { AppContent } from "../components/AppContent";
 import { AppProps } from "./Store";
 
-import "../css/App.css";
-
 type LoaderState = "normal" | "error";
 
 /**

@@ -24,7 +24,7 @@ import { ButtonBar } from "./ButtonBar";
 import { JsonTree } from "./JsonTree";
 
 import "../css/App.css";
-import { makeSelectorFor } from "../app/Util";
+import { makeSelectorFor, urlSet, urlGet } from "../app/Util";
 import * as Sdf from "../types/Sdf";
 import {
   AppState,
@@ -101,8 +101,7 @@ export const AppContent = (props: AppProps) => {
 
   useEffect(() => {
     if (schemaSummaries.size > 0 && !selectedId) {
-      const urlParams = new URLSearchParams(window.location.hash.substring(1));
-      const urlId = urlParams.get(URL_KEY) as Sdf.DocumentId;
+      const urlId = urlGet(URL_KEY) as Sdf.DocumentId;
       const selectedId =
         urlId !== null && schemaSummaries.has(urlId)
           ? urlId
@@ -110,9 +109,7 @@ export const AppContent = (props: AppProps) => {
       selectSchema(selectedId);
     }
     if (selectedId) {
-      const usp = new URLSearchParams();
-      usp.append(URL_KEY, selectedId);
-      window.location.hash = usp.toString();
+      urlSet(URL_KEY, selectedId);
     }
   }, [schemaSummaries, selectSchema, selectedId]);
 

@@ -164,6 +164,16 @@
 
 #root {
   height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-content {
+  flex: 1 1 auto;
+}
+
+.tab-content > .tab-pane.active {
+  display: flex;
 }
 
 #topLeftDiv {

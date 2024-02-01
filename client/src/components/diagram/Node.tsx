@@ -65,9 +65,9 @@ const getColorClass = (
   if (isSchemaArg) return "schemaArg";
   const ta2TypeClass = getTa2NodeInfo(data.ta2Type)[0];
   if (ta2TypeClass) return ta2TypeClass;
-  const isSusbschema = !forceArray(referent.wd_node ?? "")[0].match(
-    /^wd(t)?:Q/,
-  );
+  const isSusbschema =
+    referent.wd_node &&
+    !forceArray(referent.wd_node ?? "")[0].match(/^wd(t)?:Q/);
   if (isSusbschema) return "subschemaNode";
   if (
     referent.hasOwnProperty("participants") ||

@@ -5,6 +5,7 @@
  */
 
 import * as React from "react";
+import { useState, useEffect } from "react";
 import { KeyPath } from "react-json-tree";
 import { toast } from "react-toastify";
 
@@ -98,6 +99,9 @@ type ErrorMessage = {
 const isErrorMessage = (x: any): x is ErrorMessage =>
   typeof x.title === "string" && typeof x.description === "string";
 
+export const newlineToHtml = (s: string) =>
+  s.split("\n").flatMap((s: string) => [s, <br />]);
+
 /**
  * Notify the user of the error and perform any other relevant actions.
  *
@@ -127,9 +131,7 @@ export const handleError = async (
   }
   if (e instanceof Error) console.warn(e);
   else console.warn(title, description);
-  const htmlDescription = description
-    .split("\n")
-    .flatMap((s: string) => [s, <br />]);
+  const htmlDescription = newlineToHtml(description);
   htmlDescription.pop();
   const jsx = (
     <>
@@ -139,4 +141,33 @@ export const handleError = async (
   );
   if (warn) toast.warn(jsx);
   else toast.error(jsx);
+};
+
+export const urlGet = (key: string): string | null =>
+  new URLSearchParams(window.location.hash.substring(1)).get(key);
+
+export const urlSet = (key: string, value: string | null) => {
+  const usp = new URLSearchParams(window.location.hash.substring(1));
+  if (value === null) usp.delete(key);
+  else usp.set(key, value);
+  window.location.hash = usp.toString();
+};
+
+export type UrlValue = string | null;
+
+export const useUrlState = <T extends UrlValue>(
+  key: string,
+  initVal: T,
+): [T, (v: T) => void] => {
+  const [state, _setState] = useState(initVal);
+  useEffect(() => {
+    setState((urlGet(key) as any) ?? initVal);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const setState = (value: T) => {
+    urlSet(key, value);
+    _setState(value);
+  };
+
+  return [state, setState];
 };

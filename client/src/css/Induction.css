@@ -1,0 +1,62 @@
+#indContent {
+  flex: 1 1 auto;
+  padding: 12pt;
+  display: flex;
+  flex-direction: column;
+}
+
+#indTableDiv {
+  flex: 1 1 50%;
+  min-height: 0;
+  flex-direction: column;
+  overflow: scroll;
+  margin-bottom: 6pt;
+  border: 1px solid #bbb;
+}
+
+#indTable {
+  margin-bottom: 0;
+  /*
+  border-collapse: separate;
+  */
+}
+
+#indTable th div {
+  border-bottom: 1px solid #ddd;
+  padding: 0.75rem;
+}
+
+#indTable tr.indSelected {
+  background-color: #dff;
+}
+
+#indTable th {
+  padding: 0px;
+}
+
+#indTable td,
+#indTable th {
+  border-right: unset;
+  border-left: unset;
+}
+
+#indTable th {
+  top: 0;
+  position: sticky;
+  background-color: #fff;
+  background-clip: padding-box;
+}
+
+#indInfo {
+  border: 1px solid #bbb;
+  flex: 1 1 50%;
+  padding: 6pt;
+  overflow: scroll;
+}
+
+#newJobInfo {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #eee;
+  border: 1px #ddd;
+}

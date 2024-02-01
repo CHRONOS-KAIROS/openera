@@ -452,3 +452,22 @@ class ZipSchemas:
         req_json = json.load(req.stream)
         resp.content_type = "application/zip"
         resp.body = db.zip_schemas(req_json["schemaIds"]).getvalue()
+
+
+def connector_sink(req: Any, resp: Any) -> None:
+    # TODO Read this from environment
+    # kpc_url = "http://lor.lti.cs.cmu.edu:7300/"
+    kpc_url = "http://localhost:8001/"
+    forward_path = "/".join(req.path.split("/")[2:])
+    headers = {k: v for k, v in req.headers.items() if k.lower() in ["content-type"]}
+    up_resp = requests.request(
+        req.method, kpc_url + forward_path, headers=headers, data=req.stream.read()
+    )
+
+    if forward_path == "jobs" and req.method == "GET" and up_resp.ok:
+        db.update_induced_schemas(up_resp.json())
+
+    resp.body = up_resp.text
+    resp.status = falcon.get_http_status(up_resp.status_code)
+    for k, v in up_resp.headers.items():
+        resp.set_header(k, v)

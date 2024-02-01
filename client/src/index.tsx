@@ -10,7 +10,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import * as immer from "immer";
 
-import { AppLoader } from "./app/AppLoader";
+import { Root } from "./Root";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "allotment/dist/style.css";
@@ -18,4 +18,4 @@ import "allotment/dist/style.css";
 immer.enablePatches();
 immer.enableMapSet();
 
-ReactDOM.render(<AppLoader />, document.getElementById("root"));
+ReactDOM.render(<Root />, document.getElementById("root"));

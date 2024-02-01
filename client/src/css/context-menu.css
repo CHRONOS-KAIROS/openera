@@ -59,8 +59,8 @@
 
 .ContextMenuSeparator {
   height: 1px;
-  background-color: #eeeeee;
-  margin: 5px;
+  background-color: #cccccc;
+  margin: 1px;
 }
 
 .ContextMenuItemIndicator {

@@ -21,6 +21,32 @@ import { useDiagramStore } from "./Store";
 
 import "../../css/context-menu.css";
 
+const Sep = () => <ContextMenu.Separator className="ContextMenuSeparator" />;
+
+const RightChevron = () => (
+  <span className="RightSlot">
+    <FaChevronRight size="1em" />
+  </span>
+);
+
+const SubMenu = ({
+  text,
+  children,
+  ...rest
+}: React.ComponentProps<typeof ContextMenu.Sub> & { text: string }) => (
+  <ContextMenu.Sub>
+    <ContextMenu.SubTrigger className="ContextMenuSubTrigger">
+      {text}
+      <RightChevron />
+    </ContextMenu.SubTrigger>
+    <ContextMenu.Portal>
+      <ContextMenu.SubContent className="ContextMenuSubContent">
+        {children}
+      </ContextMenu.SubContent>
+    </ContextMenu.Portal>
+  </ContextMenu.Sub>
+);
+
 const Item = ({
   children,
   ...rest
@@ -30,6 +56,11 @@ const Item = ({
       {children}
     </ContextMenu.Item>
   );
+};
+
+const GoToJson = ({ id }: { id: Sdf.AnyId }) => {
+  const goto = useAppContext((s) => s.goToJson);
+  return <Item onSelect={() => goto(id)}>Go to JSON</Item>;
 };
 
 const readOnlySelector = makeAppSelector(["schemaEditState"]);
@@ -43,10 +74,10 @@ export const DiagramContextMenu = (props: React.PropsWithChildren<{}>) => {
   );
 };
 
-const eventContextMenuSelector = makeAppSelector(["mutator", "goToJson"]);
+const eventContextMenuSelector = makeAppSelector(["mutator"]);
 
 export const Event = (props: React.PropsWithChildren<{ event: Sdf.Event }>) => {
-  const { goToJson, mutator } = useAppContext(eventContextMenuSelector);
+  const { mutator } = useAppContext(eventContextMenuSelector);
   const setConnectionStartObject = useDiagramStore(
     (s) => s.setConnectionStartObject,
   );
@@ -62,6 +93,21 @@ export const Event = (props: React.PropsWithChildren<{ event: Sdf.Event }>) => {
     mutator.editEventType(event["@id"], primitive.wd_node, primitive.wd_label);
   };
 
+  const childrenGateMenu = (
+    <SubMenu text="Children gate">
+      {["and", "or", "xor"].map((gate) => (
+        <Item
+          key={gate}
+          onSelect={() =>
+            mutator.editEventProp(event["@id"], "children_gate", gate)
+          }
+        >
+          {gate}
+        </Item>
+      ))}
+    </SubMenu>
+  );
+
   return (
     <GenericContextMenu triggerContent={props.children}>
       <HideReadOnly>
@@ -75,39 +121,46 @@ export const Event = (props: React.PropsWithChildren<{ event: Sdf.Event }>) => {
         >
           Start connection
         </Item>
-        <Item
-          onSelect={() =>
-            dialogManagerRef.promptEditText("name", event.name, (x) =>
-              mutator.editEventProp(event["@id"], "name", x),
-            )
-          }
-        >
-          Edit name
-        </Item>
-        <Item onSelect={editEventType}>Edit event type</Item>
-        <Item
-          onSelect={() =>
-            dialogManagerRef.promptEditText("description", event.name, (x) =>
-              mutator.editEventProp(event["@id"], "description", x),
-            )
-          }
-        >
-          Edit description
-        </Item>
-        <Item
-          onSelect={() =>
-            dialogManagerRef.promptEditText("TA1Explanation", event.name, (x) =>
-              mutator.editEventProp(event["@id"], "ta1explanation", x),
-            )
-          }
-        >
-          Edit TA1explanation
-        </Item>
+        <SubMenu text="Edit...">
+          <Item
+            onSelect={() =>
+              dialogManagerRef.promptEditText("name", event.name, (x) =>
+                mutator.editEventProp(event["@id"], "name", x),
+              )
+            }
+          >
+            Name
+          </Item>
+          {childrenGateMenu}
+          <Item onSelect={editEventType}>Event type</Item>
+          <Item
+            onSelect={() =>
+              dialogManagerRef.promptEditText("description", event.name, (x) =>
+                mutator.editEventProp(event["@id"], "description", x),
+              )
+            }
+          >
+            Description
+          </Item>
+          <Item
+            onSelect={() =>
+              dialogManagerRef.promptEditText(
+                "TA1Explanation",
+                event.name,
+                (x) => mutator.editEventProp(event["@id"], "ta1explanation", x),
+              )
+            }
+          >
+            TA1explanation
+          </Item>
+        </SubMenu>
+
         <Item onSelect={() => mutator.deleteEvent(event["@id"])}>
           Remove event
         </Item>
+        <Sep />
       </HideReadOnly>
-      <Item onSelect={() => goToJson(event["@id"])}>Go to JSON</Item>
+      <GoToJson id={event["@id"]} />
     </GenericContextMenu>
   );
 };
@@ -115,7 +168,7 @@ export const Event = (props: React.PropsWithChildren<{ event: Sdf.Event }>) => {
 export const Entity = (
   props: React.PropsWithChildren<{ entity: Sdf.Entity }>,
 ) => {
-  const { mutator, goToJson } = useAppContext(eventContextMenuSelector);
+  const { mutator } = useAppContext(eventContextMenuSelector);
   const { entity } = props;
   const setConnectionStartObject = useDiagramStore(
     (s) => s.setConnectionStartObject,
@@ -134,33 +187,35 @@ export const Entity = (
         >
           Start connection
         </Item>
-        <Item
-          onSelect={() =>
-            dialogManagerRef.promptEditText("name", entity.name, (x) =>
-              mutator.editEntityProp(entity["@id"], "name", x),
-            )
-          }
-        >
-          Edit name
-        </Item>
-        <Item
-          onSelect={() =>
-            dialogManagerRef.promptEditText(
-              "WikiData node",
-              forceArray(entity.wd_node)[0] || "",
-              (x) => mutator.editEntityProp(entity["@id"], "wd_node", x),
-            )
-          }
-        >
-          Edit WikiData node
-        </Item>
-        <Item
-          onSelect={() =>
-            mutator.editEntityProp(entity["@id"], "isSchemaArg", !isSchemaArg)
-          }
-        >
-          {isSchemaArg ? "Unset" : "Set"} as schema arg
-        </Item>
+        <SubMenu text="Edit...">
+          <Item
+            onSelect={() =>
+              dialogManagerRef.promptEditText("name", entity.name, (x) =>
+                mutator.editEntityProp(entity["@id"], "name", x),
+              )
+            }
+          >
+            Name
+          </Item>
+          <Item
+            onSelect={() =>
+              dialogManagerRef.promptEditText(
+                "WikiData node",
+                forceArray(entity.wd_node)[0] || "",
+                (x) => mutator.editEntityProp(entity["@id"], "wd_node", x),
+              )
+            }
+          >
+            WikiData node
+          </Item>
+          <Item
+            onSelect={() =>
+              mutator.editEntityProp(entity["@id"], "isSchemaArg", !isSchemaArg)
+            }
+          >
+            {isSchemaArg ? "Unset" : "Set"} as schema arg
+          </Item>
+        </SubMenu>
         <Item
           onSelect={(e) => {
             mutator.deleteEntity(entity["@id"]);
@@ -173,8 +228,9 @@ export const Entity = (
         >
           Delete entity
         </Item>
+        <Sep />
       </HideReadOnly>
-      <Item onSelect={() => goToJson(entity["@id"])}>Go to JSON</Item>
+      <GoToJson id={entity["@id"]} />
     </GenericContextMenu>
   );
 };
@@ -186,7 +242,7 @@ export const ParentChildLink = (
     triggerId: string;
   }>,
 ) => {
-  const { mutator, goToJson } = useAppContext(eventContextMenuSelector);
+  const { mutator } = useAppContext(eventContextMenuSelector);
   const { parentId, childId, triggerId } = props;
 
   const importanceButton = (val: number | undefined) => (
@@ -199,19 +255,9 @@ export const ParentChildLink = (
   );
 
   const importanceSubmenu = (
-    <ContextMenu.Sub>
-      <ContextMenu.SubTrigger className="ContextMenuSubTrigger">
-        Set importance
-        <span className="RightSlot">
-          <FaChevronRight size="1em" />
-        </span>
-      </ContextMenu.SubTrigger>
-      <ContextMenu.Portal>
-        <ContextMenu.SubContent className="ContextMenuSubContent">
-          {[1.0, 0.7, 0.5, 0.3, 0.1, undefined].map(importanceButton)}
-        </ContextMenu.SubContent>
-      </ContextMenu.Portal>
-    </ContextMenu.Sub>
+    <SubMenu text="Set importance">
+      {[1.0, 0.7, 0.5, 0.3, 0.1, undefined].map(importanceButton)}
+    </SubMenu>
   );
 
   return (
@@ -227,8 +273,9 @@ export const ParentChildLink = (
         >
           Delete relation
         </Item>
+        <Sep />
       </HideReadOnly>
-      <Item onSelect={() => goToJson(parentId)}>Go to JSON</Item>
+      <GoToJson id={parentId} />
     </GenericContextMenu>
   );
 };
@@ -239,12 +286,11 @@ export const Ta2CorefEdge = (
     triggerId: string;
   }>,
 ) => {
-  const { goToJson } = useAppContext(eventContextMenuSelector);
   const { schemaObjectId, triggerId } = props;
 
   return (
     <GenericContextMenu id={triggerId} triggerContent={props.children}>
-      <Item onSelect={() => goToJson(schemaObjectId)}>Go to JSON</Item>
+      <GoToJson id={schemaObjectId} />
     </GenericContextMenu>
   );
 };
@@ -255,7 +301,7 @@ export const BeforeAfterLink = (
     triggerId: string;
   }>,
 ) => {
-  const { mutator, goToJson } = useAppContext(eventContextMenuSelector);
+  const { mutator } = useAppContext(eventContextMenuSelector);
   const { relationId, triggerId } = props;
 
   return (
@@ -271,7 +317,7 @@ export const BeforeAfterLink = (
           Delete relation
         </Item>
       </HideReadOnly>
-      <Item onSelect={() => goToJson(relationId)}>Go to JSON</Item>
+      <GoToJson id={relationId} />
     </GenericContextMenu>
   );
 };
@@ -282,7 +328,7 @@ export const ParticipantLink = (
     triggerId: string;
   }>,
 ) => {
-  const { mutator, goToJson } = useAppContext(eventContextMenuSelector);
+  const { mutator } = useAppContext(eventContextMenuSelector);
   const { participantId, triggerId } = props;
 
   return (
@@ -299,7 +345,7 @@ export const ParticipantLink = (
           Delete relation
         </Item>
       </HideReadOnly>
-      <Item onSelect={() => goToJson(participantId)}>Go to JSON</Item>
+      <GoToJson id={participantId} />
     </GenericContextMenu>
   );
 };
