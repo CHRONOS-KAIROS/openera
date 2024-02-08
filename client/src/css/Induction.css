@@ -40,6 +40,11 @@
   border-left: unset;
 }
 
+#indTable td {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
 #indTable th {
   top: 0;
   position: sticky;
@@ -59,4 +64,19 @@
   padding: 0.5rem;
   background: #eee;
   border: 1px #ddd;
+}
+
+#indToolbar {
+  margin-bottom: 1rem;
+  vertical-align: middle;
+  display: flex;
+}
+
+#indToolbar span {
+  display: flex;
+  align-items: center;
+}
+
+#indToolbarButtons {
+  flex: 1 1 auto;
 }

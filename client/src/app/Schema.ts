@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 import { produce } from "immer";
-import { forceArray, getLastIri, makeRandomKey } from "./Util";
+import { forceArray, getLastIri, makeRandomKey, formatTitle } from "./Util";
 import { Server, WikidataValues } from "./Server";
 import * as Sdf from "../types/Sdf";
 
@@ -296,6 +296,45 @@ export class Mutator {
       doc.events = forceArray(doc.events).filter((s) => s["@id"] !== eventId);
     });
 
+  public generateSubevents = async (
+    event: Sdf.Event,
+    docId: Sdf.DocumentId,
+  ) => {
+    const title = formatTitle(event.name.replace("_", " "));
+    const jobData = {
+      title,
+      raw_title: event.name,
+      description: event.description ?? title,
+      generated_for: docId,
+    };
+    const resp = await this.server.submitJob(jobData);
+    const respData = await resp.json();
+    if (!resp.ok) console.warn(respData);
+    const inductionJobId = respData.id;
+    this.update((doc: Sdf.Document): void => {
+      const name = "(generation placeholder)";
+      const placeholderEvent: Sdf.Event = {
+        "@id": makeEventId(doc, replaceSpaces(name)),
+        name,
+        ta1explanation: "",
+        description: "",
+        wd_node: ("induction:" + inductionJobId) as Sdf.WdNode,
+        wd_label: "",
+        wd_description: "",
+        participants: [],
+        children: [],
+      };
+      doc.events = forceArray(doc.events);
+      doc.events.push(placeholderEvent);
+      doc.events
+        .filter((e) => e["@id"] === event["@id"])
+        .map(
+          (docEvent) =>
+            (docEvent.children = [{ child: placeholderEvent["@id"] }]),
+        );
+    });
+  };
+
   public deleteParentChild = (parentId: Sdf.EventId, childId: Sdf.EventId) =>
     this.update((doc: Sdf.Document): void => {
       forceArray(doc.events)
@@ -464,7 +503,9 @@ export class Mutator {
    * people have WikiData memorized (shocker). The resolved names are stored in
    * privateData which can basically hold any auxiliary necessary.
    */
-  public addWdLabels = async (schema: Sdf.Document): Promise<Sdf.Document> => {
+  public addWdLabels = async (
+    schema: Sdf.Document,
+  ): Promise<(d: Sdf.Document) => void> => {
     const allQnodes = getQnodeObjects(schema)
       .flatMap((o) => o.wd_node)
       .filter((x) => x)
@@ -494,8 +535,8 @@ export class Mutator {
           (p) => (p as PromiseFulfilledResult<[string, WikidataValues]>).value,
         ),
     );
-    // Now apply the labels
-    return produce(schema, (draft) =>
+    // Now create an updater which can be used by the calling function.
+    return (draft: Sdf.Document) =>
       getQnodeObjects(draft).forEach((obj) => {
         // Suggestion: Handle wd_node arrays
         if (
@@ -508,8 +549,7 @@ export class Mutator {
           obj.wd_label = values.label;
           obj.wd_description = values.description;
         }
-      }),
-    );
+      });
   };
 
   /**
@@ -518,11 +558,10 @@ export class Mutator {
    * Since dealing with async function is somewhat cumbersome, they are handled
    * separately from all synchronous operations.
    */
-  public doAsyncUpdates = async (
-    schemaFile: Sdf.Document,
-  ): Promise<Sdf.Document> => {
-    let newSchemaFile = schemaFile;
-    return await this.addWdLabels(newSchemaFile);
+  public getAsyncUpdaters = async (
+    doc: Sdf.Document,
+  ): Promise<(d: Sdf.Document) => void> => {
+    return await this.addWdLabels(doc);
   };
 }
 

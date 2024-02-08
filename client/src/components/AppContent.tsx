@@ -10,7 +10,6 @@
 
 import * as React from "react";
 import { useRef, useEffect } from "react";
-import { useStore } from "zustand";
 import { Allotment } from "allotment";
 import { ToastContainer } from "react-toastify";
 import { ReactFlowProvider } from "reactflow";
@@ -26,14 +25,7 @@ import { JsonTree } from "./JsonTree";
 import "../css/App.css";
 import { makeSelectorFor, urlSet, urlGet } from "../app/Util";
 import * as Sdf from "../types/Sdf";
-import {
-  AppState,
-  AppAction,
-  AppContext,
-  AppProps,
-  AppStore,
-  createAppStore,
-} from "../app/Store";
+import { AppState, AppAction, useAppContext } from "../app/Store";
 
 /** The key for the query string in the URL anchor specifying the schema */
 const URL_KEY = "schemaId";
@@ -68,23 +60,22 @@ const selector = makeSelectorFor<AppState & AppAction>()([
   "schemaSummaries",
   "reloadSummaries",
   "schemaSaveState",
+  "eventPrimitives",
 ] as const);
 
-export const AppContent = (props: AppProps) => {
+export const AppContent = () => {
   // Declare values, state //
 
-  const appStore = useRef<AppStore | null>(null);
-  if (appStore.current === null) appStore.current = createAppStore(props);
-
-  const { eventPrimitives } = props;
-  const store = useStore(appStore.current, selector);
+  const store = useAppContext(selector);
   const {
+    eventPrimitives,
     selectSchema,
     schemaSummaries,
     selectedId,
     schemaState,
     getCurrentSummary,
     loadSchema,
+    reloadSummaries,
   } = store;
 
   const writeLockRefresherId = useRef<null | number>(null);
@@ -95,8 +86,11 @@ export const AppContent = (props: AppProps) => {
   const handleFocus = () => (lastWindowFocus.current = new Date());
   useEffect(() => {
     window.addEventListener("focus", handleFocus);
+
     // Not sure if this is the right way to remove the event listener.
-    return () => window.removeEventListener("focus", handleFocus);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
   }, []);
 
   useEffect(() => {
@@ -114,14 +108,8 @@ export const AppContent = (props: AppProps) => {
   }, [schemaSummaries, selectSchema, selectedId]);
 
   useEffect(() => {
-    const idIsValid = selectedId !== null && getCurrentSummary() !== null;
-    if (schemaState === "empty" && idIsValid) loadSchema();
-  }, [selectedId, getCurrentSummary, loadSchema, schemaState]);
-
-  useEffect(() => {
-    store.reloadSummaries();
-    // Reload summaries whenever the selectedId changes.
-  }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
+    reloadSummaries();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (
     selectedId !== null &&
@@ -162,44 +150,42 @@ export const AppContent = (props: AppProps) => {
   const maybeJsonTree = store.doc ? <JsonTree doc={store.doc} /> : null;
 
   return (
-    <AppContext.Provider value={appStore.current}>
-      <ReactFlowProvider>
-        <DialogManager />
-        <ToastContainer
-          position="bottom-center"
-          pauseOnHover
-          pauseOnFocusLoss
-          autoClose={false}
-          closeOnClick={false}
-          draggable={false}
-          newestOnTop
-        />
-        <Allotment vertical={false}>
-          <Allotment.Pane>
-            <Allotment vertical={true}>
-              <div id="topLeftDiv">
-                {maybeDiagram}
-                <ButtonBar />
-              </div>
-              <Allotment.Pane visible={store.showRawJson} preferredSize={300}>
-                <div style={{ width: "100%" }}>
-                  <div
-                    id="reactJsonContainer"
-                    style={{ display: store.showRawJson ? "block" : "none" }}
-                  >
-                    {maybeJsonTree}
-                  </div>
-                </div>
-              </Allotment.Pane>
-            </Allotment>
-          </Allotment.Pane>
-          <Allotment.Pane preferredSize={400} snap={true}>
-            <div id="schemaNavDiv" className="topdiv">
-              <SchemaLibraryMenu />
+    <ReactFlowProvider>
+      <DialogManager />
+      <ToastContainer
+        position="bottom-center"
+        pauseOnHover
+        pauseOnFocusLoss
+        autoClose={false}
+        closeOnClick={false}
+        draggable={false}
+        newestOnTop
+      />
+      <Allotment vertical={false}>
+        <Allotment.Pane>
+          <Allotment vertical={true}>
+            <div id="topLeftDiv">
+              {maybeDiagram}
+              <ButtonBar />
             </div>
-          </Allotment.Pane>
-        </Allotment>
-      </ReactFlowProvider>
-    </AppContext.Provider>
+            <Allotment.Pane visible={store.showRawJson} preferredSize={300}>
+              <div style={{ width: "100%" }}>
+                <div
+                  id="reactJsonContainer"
+                  style={{ display: store.showRawJson ? "block" : "none" }}
+                >
+                  {maybeJsonTree}
+                </div>
+              </div>
+            </Allotment.Pane>
+          </Allotment>
+        </Allotment.Pane>
+        <Allotment.Pane preferredSize={400} snap={true}>
+          <div id="schemaNavDiv" className="topdiv">
+            <SchemaLibraryMenu />
+          </div>
+        </Allotment.Pane>
+      </Allotment>
+    </ReactFlowProvider>
   );
 };

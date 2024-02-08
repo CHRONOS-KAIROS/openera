@@ -10,6 +10,7 @@ import json
 from typing import Any, cast
 import uuid
 import datetime
+import os
 
 import requests
 import falcon
@@ -455,10 +456,8 @@ class ZipSchemas:
 
 
 def connector_sink(req: Any, resp: Any) -> None:
-    # TODO Read this from environment
-    # kpc_url = "http://lor.lti.cs.cmu.edu:7300/"
-    kpc_url = "http://localhost:8001/"
-    forward_path = "/".join(req.path.split("/")[2:])
+    kpc_url = f"http://{os.environ['CONNECTOR_HOST']}/"
+    forward_path = "/".join(req.path.split("/")[3:])
     headers = {k: v for k, v in req.headers.items() if k.lower() in ["content-type"]}
     up_resp = requests.request(
         req.method, kpc_url + forward_path, headers=headers, data=req.stream.read()

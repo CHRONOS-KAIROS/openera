@@ -5,7 +5,7 @@
  */
 
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { KeyPath } from "react-json-tree";
 import { toast } from "react-toastify";
 
@@ -160,14 +160,24 @@ export const useUrlState = <T extends UrlValue>(
   initVal: T,
 ): [T, (v: T) => void] => {
   const [state, _setState] = useState(initVal);
+
+  const setState = useCallback(
+    (value: T) => {
+      urlSet(key, value);
+      _setState(value);
+    },
+    [_setState, key],
+  );
+
   useEffect(() => {
     setState((urlGet(key) as any) ?? initVal);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const setState = (value: T) => {
-    urlSet(key, value);
-    _setState(value);
-  };
+  }, [initVal, key, setState]);
 
   return [state, setState];
 };
+
+export const formatTitle = (t: string) =>
+  t
+    .split(" ")
+    .map((x) => x[0].toUpperCase() + x.slice(1).toLowerCase())
+    .join("");

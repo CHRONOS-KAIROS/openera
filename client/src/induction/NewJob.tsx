@@ -4,36 +4,11 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 
 import { JobId } from "./Types";
-import { newlineToHtml } from "../app/Util";
+import { useAppContext } from "../app/Store";
+import { formatTitle } from "../app/Util";
 
 const NewJobStatusValues = ["ready", "submitting"] as const;
 type NewJobStatus = (typeof NewJobStatusValues)[number];
-
-const formatTitle = (t: string) =>
-  t
-    .split(" ")
-    .map((x) => x[0].toUpperCase() + x.slice(1).toLowerCase())
-    .join("");
-
-const submitJob = async (
-  rawTitle: string,
-  description: string,
-): Promise<Response> => {
-  const title = formatTitle(rawTitle);
-  const newJobData = {
-    title,
-    description,
-    status: "pending",
-  };
-  const resp = await fetch("http://localhost:8000/connector/jobs", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(newJobData),
-  });
-  return resp;
-};
 
 type Props = {
   updateJobs: () => void;
@@ -45,19 +20,24 @@ export const NewJob = ({ updateJobs, selectJob }: Props) => {
   const [info, setInfo] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const server = useAppContext((s) => s.server);
 
   const notReady = status !== "ready";
 
   const handleSubmit = async () => {
     setStatus("submitting");
-    const submitResp = await submitJob(title, description);
+
+    const submitResp = await server.submitJob({
+      title: formatTitle(title),
+      raw_title: title,
+      description,
+    });
     const data = await submitResp.json();
     if (submitResp.ok) {
       setInfo("");
       selectJob(data.id);
     } else {
       setInfo(data.message);
-      console.log(data.message);
     }
     setTitle("");
     setDescription("");
@@ -67,7 +47,7 @@ export const NewJob = ({ updateJobs, selectJob }: Props) => {
 
   return (
     <div>
-      <h3>New Schema Indunction Job</h3>
+      <h3>New Schema Induction Job</h3>
       <Form.Group>
         <Form.Label>Title</Form.Label>
         <Form.Control

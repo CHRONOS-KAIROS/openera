@@ -22,6 +22,7 @@ import {
   getPath,
   makeSelectorFor,
   handleError,
+  forceArray,
 } from "../app/Util";
 import { Mutator } from "../app/Schema";
 
@@ -112,384 +113,415 @@ export const createAppStore = (props: AppProps) =>
      * while it automagically translated into immutable copy+edits which play
      * nice with React.
      */
-    immer((set, get) => ({
-      ...props,
+    immer((_set, get) => {
+      const set: typeof _set = (...args) => {
+        let prevSelectedId = get().selectedId;
+        _set(...args);
 
-      schemaState: "empty",
-      selectedId: null,
-      showRawJson: false,
-      highlightedJsonPath: null,
-      selectedARState: null,
-      sdfPatches: [],
-      docIdx: 0,
-      doc: null,
-      actions: [],
-      actionReady: true,
-      stepsAreFocused: false,
-      schemaEditState: "readonly",
-      schemaSaveState: "saved",
-      clientId:
-        window.location.hostname === "localhost"
-          ? ("developer" as Types.ClientId)
-          : (makeRandomKey() as Types.ClientId),
-      schemaSummaries: new Map(),
+        // These reactive state changes are scoped so that stale variables do
+        // not leak.  E.g., we want to avoid stale values:
+        // > const { a } = get();  // a === 0
+        // > set(s => {s.a++;});
+        // > if (a === 0)  // a === 0 <- We don't want this!
+        // >   ...
+        {
+          const { selectedId, getCurrentSummary, schemaState, loadSchema } =
+            get();
+          const idIsValid = selectedId !== null && getCurrentSummary() !== null;
+          if (schemaState === "empty" && idIsValid) loadSchema();
+        }
+        {
+          const { selectedId, reloadSummaries } = get();
+          if (selectedId !== prevSelectedId) reloadSummaries();
+        }
+      };
 
-      mutator: new Mutator(
-        (m) => get().handleMutation(m),
-        props.server,
-        props.eventPrimitives,
-      ),
+      return {
+        ...props,
 
-      toggleJsonView: () =>
-        set((s) => {
-          s.showRawJson = !s.showRawJson;
-        }),
+        schemaState: "empty",
+        selectedId: null,
+        showRawJson: false,
+        highlightedJsonPath: null,
+        selectedARState: null,
+        sdfPatches: [],
+        docIdx: 0,
+        doc: null,
+        actions: [],
+        actionReady: true,
+        stepsAreFocused: false,
+        schemaEditState: "readonly",
+        schemaSaveState: "saved",
+        clientId:
+          window.location.hostname === "localhost"
+            ? ("developer" as Types.ClientId)
+            : (makeRandomKey() as Types.ClientId),
+        schemaSummaries: new Map(),
 
-      getCurrentSummary: (): Types.SchemaSummary | null => {
-        const { selectedId, schemaSummaries } = get();
-        if (selectedId === null) return null;
-        const maybeSummary = schemaSummaries.get(selectedId);
-        return maybeSummary || null;
-      },
+        mutator: new Mutator(
+          (m) => get().handleMutation(m),
+          props.server,
+          props.eventPrimitives,
+        ),
 
-      selectSchema: (newId: Sdf.DocumentId | null): void =>
-        set((state) => {
-          if (state.schemaSummaries.size === 0) {
-            newId = null;
-          } else {
-            if (newId === null)
-              newId = state.schemaSummaries.keys().next().value;
-          }
-          state.selectedId = newId;
-          state.schemaState = "empty";
-          state.schemaEditState = "readonly";
-          state.schemaSaveState = "saved";
-          state.highlightedJsonPath = null;
-          state.sdfPatches = [];
-          state.docIdx = 0;
-        }),
+        toggleJsonView: () =>
+          set((s) => {
+            s.showRawJson = !s.showRawJson;
+          }),
 
-      /** Trigger the app to load the currently selected schema. */
-      loadSchema: async (): Promise<void> => {
-        const { selectedId } = get();
-        if (selectedId === null) return;
-        set((s) => {
-          s.schemaState = "loading";
-        });
-        try {
-          let doc = await props.server.getSchemaJSON(selectedId);
+        getCurrentSummary: (): Types.SchemaSummary | null => {
+          const { selectedId, schemaSummaries } = get();
+          if (selectedId === null) return null;
+          const maybeSummary = schemaSummaries.get(selectedId);
+          return maybeSummary || null;
+        },
+
+        selectSchema: (newId: Sdf.DocumentId | null): void =>
           set((state) => {
-            state.doc = state.mutator.preprocessSchema(doc);
-            state.schemaState = "loaded";
-          });
-        } catch (e) {
-          console.error(e);
-          handleError(e);
-          set((s) => {
-            s.schemaState = "error";
-          });
-        }
-        const doc = get().doc;
-        if (doc) {
-          get()
-            .mutator.doAsyncUpdates(doc)
-            .then((_doc) =>
-              set((draft) => {
-                draft.doc = _doc;
-              }),
-            );
-        }
-      },
+            if (state.schemaSummaries.size === 0) {
+              newId = null;
+            } else {
+              if (newId === null)
+                newId = state.schemaSummaries.keys().next().value;
+            }
+            state.selectedId = newId;
+            state.schemaState = "empty";
+            state.schemaEditState = "readonly";
+            state.schemaSaveState = "saved";
+            state.highlightedJsonPath = null;
+            state.sdfPatches = [];
+            state.docIdx = 0;
+          }),
 
-      requestSchemaEditable: async (wantsToEdit: boolean) => {
-        const { doc, selectedId, clientId, loadSchema } = get();
-        if (!doc) return;
-        if (doc.ta2 === true) {
-          handleError({
-            title: "Cannot edit TA2 schema",
-            description: "TA2 schema editing is not avaialble at this time.",
-          });
-          return;
-        }
-        if (selectedId === null) return;
-        if (wantsToEdit) {
+        /** Trigger the app to load the currently selected schema. */
+        loadSchema: async (): Promise<void> => {
+          const { selectedId } = get();
+          if (selectedId === null) return;
           set((s) => {
-            s.schemaEditState = "locking";
+            s.schemaState = "loading";
           });
           try {
-            await props.server.lockSchema(selectedId, clientId);
-            // In case another user has edited the schema and then released the
-            // lock, we need the most recent version.
-            await loadSchema();
-            set((s) => {
-              s.schemaEditState = "editable";
+            let doc = await props.server.getSchemaJSON(selectedId);
+            set((state) => {
+              state.doc = state.mutator.preprocessSchema(doc);
+              state.schemaState = "loaded";
             });
+            const generatSubeventPlaceholderPresent = forceArray(
+              doc!.events,
+            ).some((e) =>
+              forceArray(e.wd_node).some((x) => x.match(/^induction:/)),
+            );
+            if (generatSubeventPlaceholderPresent)
+              window.setTimeout(get().loadSchema, 4000);
+          } catch (e) {
+            console.error(e);
+            handleError(e);
+            set((s) => {
+              s.schemaState = "error";
+            });
+          }
+          const doc = get().doc;
+          if (doc) {
+            get()
+              .mutator.getAsyncUpdaters(doc)
+              .then((updater) =>
+                set((draft) => {
+                  if (draft.doc) updater(draft.doc);
+                }),
+              );
+          }
+        },
+
+        requestSchemaEditable: async (wantsToEdit: boolean) => {
+          const { doc, selectedId, clientId, loadSchema } = get();
+          if (!doc) return;
+          if (doc.ta2 === true) {
+            handleError({
+              title: "Cannot edit TA2 schema",
+              description: "TA2 schema editing is not avaialble at this time.",
+            });
+            return;
+          }
+          if (selectedId === null) return;
+          if (wantsToEdit) {
+            set((s) => {
+              s.schemaEditState = "locking";
+            });
+            try {
+              await props.server.lockSchema(selectedId, clientId);
+              // In case another user has edited the schema and then released the
+              // lock, we need the most recent version.
+              await loadSchema();
+              set((s) => {
+                s.schemaEditState = "editable";
+              });
+            } catch (e) {
+              set((s) => {
+                s.schemaEditState = "readonly";
+              });
+              handleError(e);
+            }
+          } else {
+            props.server.unlockSchema(selectedId, clientId).catch(() => {});
+            set((s) => {
+              s.schemaEditState = "readonly";
+            });
+          }
+        },
+
+        goToJson: (atId): void => {
+          const { doc } = get();
+          if (!doc) return;
+          let rawPath = getPath(doc, "@id", atId);
+          if (rawPath === null) {
+            rawPath = getPath(doc, "provenanceID", atId);
+          }
+          if (rawPath === null) return;
+
+          set((draft) => {
+            draft.showRawJson = true;
+            draft.highlightedJsonPath = rawPath!.slice(1).concat(["root"]);
+          });
+        },
+
+        handleMutation: (mutate: (d: Sdf.Document) => void): void => {
+          if (get().schemaEditState !== "editable") {
+            handleError({
+              title: "Schema is View-Only",
+              description:
+                'Please switch the schema to "editable" to make modifications.',
+            });
+            return;
+          }
+
+          set((state) => {
+            try {
+              const [newDocument, forward, backward] = produceWithPatches(
+                state.doc,
+                mutate,
+              );
+              const newPatchPair = { forward, backward };
+              state.docIdx += 1;
+              // slice serves two purposes: first it creates a copy of the array;
+              // second, if we are not at the most recent version, it will erase history
+              // going forward from where we are now.
+              state.sdfPatches = state.sdfPatches.slice(0, state.docIdx);
+              state.sdfPatches.push(newPatchPair);
+              state.doc = newDocument;
+            } catch (err) {
+              if (err instanceof Error)
+                err.message = `During schema modification: ${err.message}`;
+              handleError(err);
+            }
+          });
+
+          get().saveSchema();
+        },
+
+        // Improvement: This function works most of the time but seems to skip or
+        // mix together changes without any discernable pattern.
+        undoRedoChange: (undoRedo: "undo" | "redo") => {
+          const { sdfPatches, docIdx, schemaEditState, doc } = get();
+          if (doc === null || schemaEditState !== "editable") return;
+          let patch: Array<Patch>;
+          let docIdxDelta: 1 | -1;
+          if (undoRedo === "undo") {
+            if (docIdx === 0) {
+              console.warn("Cannot undo: already at earliest schema.");
+              return;
+            }
+            docIdxDelta = -1;
+            patch = sdfPatches[docIdx - 1].backward;
+          } else {
+            // This is not an off-by-one error. Read the method comment.
+            if (docIdx === sdfPatches.length) {
+              console.warn("Cannot redo: already at most recent schema.");
+              return;
+            }
+            docIdxDelta = 1;
+            patch = sdfPatches[docIdx].forward;
+          }
+          set((draft) => {
+            draft.docIdx += docIdxDelta;
+            draft.doc = applyPatches(draft.doc!, patch);
+          });
+
+          get().saveSchema();
+        },
+
+        refreshWriteLock: async (
+          lastWindowFocus: React.MutableRefObject<Date>,
+        ): Promise<void> => {
+          const { selectedId, clientId } = get();
+          if (selectedId === null) return;
+          if (document.hasFocus()) lastWindowFocus.current = new Date();
+          if (
+            new Date().valueOf() - lastWindowFocus.current.valueOf() >
+            WRITE_LOCK_TIMEOUT
+          ) {
+            const err = {
+              title: "Schema is view-only",
+              description:
+                "The schema has been made view-only due to inactivity.",
+            };
+            handleError(err, true);
+            set((s) => {
+              s.schemaEditState = "readonly";
+            });
+          }
+          try {
+            await props.server.lockSchema(selectedId, clientId);
           } catch (e) {
             set((s) => {
               s.schemaEditState = "readonly";
             });
+            const err = {
+              title: "Schema is view-only",
+              description:
+                "Due to an error, the schema has been switched to view-only",
+            };
+            handleError(err, true);
             handleError(e);
           }
-        } else {
-          props.server.unlockSchema(selectedId, clientId).catch(() => {});
-          set((s) => {
-            s.schemaEditState = "readonly";
-          });
-        }
-      },
+        },
 
-      goToJson: (atId): void => {
-        const { doc } = get();
-        if (!doc) return;
-        let rawPath = getPath(doc, "@id", atId);
-        if (rawPath === null) {
-          rawPath = getPath(doc, "provenanceID", atId);
-        }
-        if (rawPath === null) return;
-
-        set((draft) => {
-          draft.showRawJson = true;
-          draft.highlightedJsonPath = rawPath!.slice(1).concat(["root"]);
-        });
-      },
-
-      handleMutation: (mutate: (d: Sdf.Document) => void): void => {
-        if (get().schemaEditState !== "editable") {
-          handleError({
-            title: "Schema is View-Only",
-            description:
-              'Please switch the schema to "editable" to make modifications.',
-          });
-          return;
-        }
-
-        set((state) => {
+        reloadSummaries: async () => {
+          const { server } = get();
           try {
-            const [newDocument, forward, backward] = produceWithPatches(
-              state.doc,
-              mutate,
+            const summaryList = await server.getSchemaJSONList();
+            const schemaSummaries = new Map(
+              summaryList.map((s) => [s.schemaId, s]),
             );
-            const newPatchPair = { forward, backward };
-            state.docIdx += 1;
-            // slice serves two purposes: first it creates a copy of the array;
-            // second, if we are not at the most recent version, it will erase history
-            // going forward from where we are now.
-            state.sdfPatches = state.sdfPatches.slice(0, state.docIdx);
-            state.sdfPatches.push(newPatchPair);
-            state.doc = newDocument;
-          } catch (err) {
-            if (err instanceof Error)
-              err.message = `During schema modification: ${err.message}`;
-            handleError(err);
+            set((s) => {
+              s.schemaSummaries = schemaSummaries;
+            });
+          } catch (e) {
+            handleError(e);
           }
-        });
+        },
 
-        get().saveSchema();
-      },
-
-      // Improvement: This function works most of the time but seems to skip or
-      // mix together changes without any discernable pattern.
-      undoRedoChange: (undoRedo: "undo" | "redo") => {
-        const { sdfPatches, docIdx, schemaEditState, doc } = get();
-        if (doc === null || schemaEditState !== "editable") return;
-        let patch: Array<Patch>;
-        let docIdxDelta: 1 | -1;
-        if (undoRedo === "undo") {
-          if (docIdx === 0) {
-            console.warn("Cannot undo: already at earliest schema.");
+        createSchema: async () => {
+          const { selectSchema, reloadSummaries, server } = get();
+          const nameInput = prompt("Enter schema name");
+          if (!nameInput) {
+            alert("Schema name cannot be empty.");
             return;
           }
-          docIdxDelta = -1;
-          patch = sdfPatches[docIdx - 1].backward;
-        } else {
-          // This is not an off-by-one error. Read the method comment.
-          if (docIdx === sdfPatches.length) {
-            console.warn("Cannot redo: already at most recent schema.");
+          try {
+            const response = await server.postNewSchemaJson(nameInput);
+            const { schemaId } = await response.json();
+            await reloadSummaries();
+            selectSchema(schemaId);
+          } catch (e) {
+            handleError(e);
+          }
+        },
+
+        editSchemaName: async (schemaId: Sdf.DocumentId) => {
+          const {
+            schemaSummaries,
+            selectSchema,
+            reloadSummaries,
+            server,
+            clientId,
+          } = get();
+          const summary = schemaSummaries.get(schemaId);
+          if (!summary) {
+            console.error(`Could not find summary for ${schemaId}`);
             return;
           }
-          docIdxDelta = 1;
-          patch = sdfPatches[docIdx].forward;
-        }
-        set((draft) => {
-          draft.docIdx += docIdxDelta;
-          draft.doc = applyPatches(draft.doc!, patch);
-        });
-
-        get().saveSchema();
-      },
-
-      refreshWriteLock: async (
-        lastWindowFocus: React.MutableRefObject<Date>,
-      ): Promise<void> => {
-        const { selectedId, clientId } = get();
-        if (selectedId === null) return;
-        if (document.hasFocus()) lastWindowFocus.current = new Date();
-        if (
-          new Date().valueOf() - lastWindowFocus.current.valueOf() >
-          WRITE_LOCK_TIMEOUT
-        ) {
-          const err = {
-            title: "Schema is view-only",
-            description:
-              "The schema has been made view-only due to inactivity.",
-          };
-          handleError(err, true);
-          set((s) => {
-            s.schemaEditState = "readonly";
-          });
-        }
-        try {
-          await props.server.lockSchema(selectedId, clientId);
-        } catch (e) {
-          set((s) => {
-            s.schemaEditState = "readonly";
-          });
-          const err = {
-            title: "Schema is view-only",
-            description:
-              "Due to an error, the schema has been switched to view-only",
-          };
-          handleError(err, true);
-          handleError(e);
-        }
-      },
-
-      reloadSummaries: async () => {
-        const { server } = get();
-        try {
-          const summaryList = await server.getSchemaJSONList();
-          const schemaSummaries = new Map(
-            summaryList.map((s) => [s.schemaId, s]),
+          const newname = prompt(
+            "Enter new name for this schema",
+            getLastIri(schemaId),
           );
-          set((s) => {
-            s.schemaSummaries = schemaSummaries;
-          });
-        } catch (e) {
-          handleError(e);
-        }
-      },
-
-      createSchema: async () => {
-        const { selectSchema, reloadSummaries, server } = get();
-        const nameInput = prompt("Enter schema name");
-        if (!nameInput) {
-          alert("Schema name cannot be empty.");
-          return;
-        }
-        try {
-          const response = await server.postNewSchemaJson(nameInput);
-          const { schemaId } = await response.json();
-          await reloadSummaries();
-          selectSchema(schemaId);
-        } catch (e) {
-          handleError(e);
-        }
-      },
-
-      editSchemaName: async (schemaId: Sdf.DocumentId) => {
-        const {
-          schemaSummaries,
-          selectSchema,
-          reloadSummaries,
-          server,
-          clientId,
-        } = get();
-        const summary = schemaSummaries.get(schemaId);
-        if (!summary) {
-          console.error(`Could not find summary for ${schemaId}`);
-          return;
-        }
-        const newname = prompt(
-          "Enter new name for this schema",
-          getLastIri(schemaId),
-        );
-        if (newname === null) return;
-        else if (newname === "") alert("Schema name cannot be empty");
-        try {
-          const jsonBody = await server.getSchemaJSON(summary.schemaId);
-          jsonBody["@id"] = jsonBody["@id"].replace(
-            /[^/]*$/,
-            newname,
-          ) as Sdf.DocumentId;
-          await server.updateSchemaJSON(summary.schemaId, clientId, jsonBody);
-          selectSchema(jsonBody["@id"]);
-          reloadSummaries();
-        } catch (e) {
-          handleError(e);
-        }
-      },
-
-      saveSchema: async (): Promise<void> => {
-        const { server, clientId, doc } = get();
-        if (!doc) return;
-        try {
-          set((s) => {
-            s.schemaSaveState = "saving";
-          });
-          await server.updateSchemaJSON(doc["@id"], clientId, doc);
-          set((s) => {
-            s.schemaSaveState = "saved";
-          });
-        } catch (e) {
-          handleError(e);
-          set((s) => {
-            s.schemaSaveState = "save-failed";
-          });
-        }
-        get()
-          .mutator.doAsyncUpdates(get().doc!)
-          .then((doc) =>
-            set((draft) => {
-              draft.doc = doc;
-            }),
-          );
-      },
-
-      deleteSchemas: async (schemaIds: Sdf.DocumentId[]): Promise<void> => {
-        const {
-          reloadSummaries,
-          selectSchema,
-          server,
-          clientId,
-          schemaSummaries,
-        } = get();
-        if (
-          !window.confirm(
-            "You cannot undo this action. Do you want to delete the selected files?",
-          )
-        ) {
-          return;
-        }
-        try {
-          const results = await Promise.allSettled(
-            schemaIds.map((x) => server.deleteSchemaJSON(x, clientId)),
-          );
-          results
-            .filter((x) => x.status === "rejected")
-            .forEach((x) => handleError((x as PromiseRejectedResult).reason));
-          reloadSummaries();
-          const { selectedId } = get();
-          if (selectedId === null || schemaIds.includes(selectedId)) {
-            selectSchema(
-              [...schemaSummaries.keys()].filter(
-                (sid) => !schemaIds.includes(sid),
-              )[0],
-            );
+          if (newname === null) return;
+          else if (newname === "") alert("Schema name cannot be empty");
+          try {
+            const jsonBody = await server.getSchemaJSON(summary.schemaId);
+            jsonBody["@id"] = jsonBody["@id"].replace(
+              /[^/]*$/,
+              newname,
+            ) as Sdf.DocumentId;
+            await server.updateSchemaJSON(summary.schemaId, clientId, jsonBody);
+            selectSchema(jsonBody["@id"]);
+            reloadSummaries();
+          } catch (e) {
+            handleError(e);
           }
-        } catch (e) {
-          handleError(e);
-        }
-      },
+        },
 
-      copySchema: async (schemaId: Sdf.DocumentId): Promise<void> => {
-        const { reloadSummaries, selectSchema, server } = get();
-        try {
-          const resp = await server.copySchema(schemaId);
-          reloadSummaries();
-          selectSchema((await resp.json()).schemaId);
-        } catch (e) {
-          handleError(e);
-        }
-      },
-    })),
+        saveSchema: async (): Promise<void> => {
+          const { server, clientId, doc } = get();
+          if (!doc) return;
+          try {
+            set((s) => {
+              s.schemaSaveState = "saving";
+            });
+            await server.updateSchemaJSON(doc["@id"], clientId, doc);
+            set((s) => {
+              s.schemaSaveState = "saved";
+            });
+          } catch (e) {
+            handleError(e);
+            set((s) => {
+              s.schemaSaveState = "save-failed";
+            });
+          }
+          get()
+            .mutator.getAsyncUpdaters(get().doc!)
+            .then((updater) =>
+              set((draft) => {
+                if (draft.doc) updater(draft.doc);
+              }),
+            );
+        },
+
+        deleteSchemas: async (schemaIds: Sdf.DocumentId[]): Promise<void> => {
+          const {
+            reloadSummaries,
+            selectSchema,
+            server,
+            clientId,
+            schemaSummaries,
+          } = get();
+          if (
+            !window.confirm(
+              "You cannot undo this action. Do you want to delete the selected files?",
+            )
+          ) {
+            return;
+          }
+          try {
+            const results = await Promise.allSettled(
+              schemaIds.map((x) => server.deleteSchemaJSON(x, clientId)),
+            );
+            results
+              .filter((x) => x.status === "rejected")
+              .forEach((x) => handleError((x as PromiseRejectedResult).reason));
+            reloadSummaries();
+            const { selectedId } = get();
+            if (selectedId === null || schemaIds.includes(selectedId)) {
+              selectSchema(
+                [...schemaSummaries.keys()].filter(
+                  (sid) => !schemaIds.includes(sid),
+                )[0],
+              );
+            }
+          } catch (e) {
+            handleError(e);
+          }
+        },
+
+        copySchema: async (schemaId: Sdf.DocumentId): Promise<void> => {
+          const { reloadSummaries, selectSchema, server } = get();
+          try {
+            const resp = await server.copySchema(schemaId);
+            reloadSummaries();
+            selectSchema((await resp.json()).schemaId);
+          } catch (e) {
+            handleError(e);
+          }
+        },
+      };
+    }),
   );

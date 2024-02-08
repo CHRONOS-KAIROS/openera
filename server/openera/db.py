@@ -286,7 +286,7 @@ class Transaction:
             self.write_schema(ref_data["@id"], ref_data, client_id)
 
     def write_schema(
-        self, schema_id: str, sdf_data: sdf.Document, client_id: str
+        self, schema_id: str, sdf_data: sdf.Document, client_id: str | None
     ) -> None:
         """Write the specified schema to the database.
 
@@ -299,8 +299,9 @@ class Transaction:
 
         """
 
-        self.set_lock(True, schema_id, client_id)
-        self._change_referring_schemas(schema_id, sdf_data["@id"], client_id)
+        if client_id is not None:
+            self.set_lock(True, schema_id, client_id)
+            self._change_referring_schemas(schema_id, sdf_data["@id"], client_id)
         update_sql = "UPDATE Schema SET data=:data, atId=:dataAtId, quarantined=0 WHERE atId=:atId"
         params = {
             "data": json.dumps(sdf_data),
@@ -749,13 +750,63 @@ def get_wikidata_values(wd_node: str) -> Tuple[str, str]:
     return label, desc
 
 
+def insert_generated_subevents(
+    job_id: str, generated_for: sdf.DocumentId, schema: sdf.Document, txn: Transaction
+) -> None:
+    parent_schema = get_schema(generated_for)
+    ps_events = ensure_list(parent_schema["events"])
+    placeholder_event: sdf.Event
+    ph_idx, placeholder_event = [
+        (i, x) for i, x in enumerate(ps_events) if x["wd_node"] == f"induction:{job_id}"
+    ][0]
+    del ps_events[ph_idx]
+    parent_event = [
+        x
+        for x in ps_events
+        if any(
+            y["child"] == placeholder_event["@id"]
+            for y in ensure_list(x.get("children", []))
+        )
+    ][0]
+    events = ensure_list(schema["events"])
+    parent_schema["events"] = ps_events
+    root_event_id = (
+        {e["@id"] for e in events}
+        - {c["child"] for e in events for c in ensure_list(e.get("children", []))}
+    ).pop()
+    root_event_idx, root_event = [
+        (i, x) for i, x in enumerate(events) if x["@id"] == root_event_id
+    ][0]
+    del events[root_event_idx]
+    ps_events.extend(events)
+    parent_event["children"] = root_event.get("children", [])
+    ps_entities = ensure_list(parent_schema["entities"])
+    ps_entities.extend(ensure_list(schema["entities"]))
+    parent_schema["entities"] = ps_entities
+
+    txn.write_schema(generated_for, parent_schema, None)
+
+    # insert entities
+    #   - inner entities
+    #   - root participants
+    # write schema
+
+
 def update_induced_schemas(job_records: Any) -> None:
     for rec in job_records:
         if schema := rec["data"].get("sdf_data", None):
-            print(schema["@id"])
             with do_transaction() as txn:
                 try:
                     txn.write_new_schema(schema)
+                    if generated_for := rec["data"].get("generated_for", None):
+                        try:
+                            insert_generated_subevents(
+                                rec["id"], generated_for, schema, txn
+                            )
+                        except Exception as e:
+                            print(
+                                f"Could not insert subevents for induction job: {rec['id']} due to:\n{e}"
+                            )
                 except sqlite3.IntegrityError:
                     pass
 

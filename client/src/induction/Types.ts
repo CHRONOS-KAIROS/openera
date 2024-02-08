@@ -16,6 +16,9 @@ export type Job = {
   status: JobStatus;
   parent: JobId | null;
   sdf_data: Sdf.Document | null;
+  raw_title: string | null;
+  last_updated: string | null;
+  error_message: string | null;
 };
 
 export type JobRecord = {

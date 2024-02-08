@@ -11,6 +11,7 @@
 import { forceArray, isSchemaSummary } from "./Util";
 import * as Sdf from "../types/Sdf";
 import * as Types from "../types/Types";
+import { JobId } from "../induction/Types";
 
 /**
  * We need to manually escape `/`'s because the hex-encoded version, `%2F` will
@@ -292,5 +293,45 @@ export class Server {
       console.error(e);
       return null;
     }
+  };
+
+  public getInductionJobs = async () => {
+    const resp = await this.apiFetch(["connector", "jobs"]);
+    const rows = await resp.json();
+    return rows;
+  };
+
+  public submitJob = async (jobData: {
+    title: string;
+    raw_title: string;
+    description: string;
+    generated_for?: Sdf.DocumentId;
+  }): Promise<Response> => {
+    const newJobData = {
+      ...jobData,
+      status: "pending",
+    };
+    const resp = await this.apiFetch(["connector", "jobs"], {
+      init: {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newJobData),
+      },
+    });
+    return resp;
+  };
+
+  public deleteJob = async (id: JobId) => {
+    const resp = await this.apiFetch(["connector", "jobs", id], {
+      init: {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    });
+    return resp;
   };
 }

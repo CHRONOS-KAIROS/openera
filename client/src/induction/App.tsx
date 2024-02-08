@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 import * as React from "react";
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 
@@ -16,19 +16,22 @@ import { JobInfo } from "./JobInfo";
 import { JobRecord } from "./Types";
 import * as Sdf from "../types/Sdf";
 import { useAppContext } from "../app/Store";
+import { UiPage } from "../Root";
 
 import "../css/Induction.css";
 
-const getRows = async () => {
-  const resp = await fetch(`http://localhost:8000/connector/jobs`);
-  const rows = await resp.json();
-  return rows;
+type Props = {
+  setPage: (up: UiPage) => void;
 };
 
-export const App = () => {
+export const App = ({ setPage }: Props) => {
   const [rowKey, setRowKey] = useUrlState<string | null>("indRowKey", "0");
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [rows, _setRows] = useState<Array<JobRecord>>([]);
+  const [selectSchema, server] = useAppContext((s) => [
+    s.selectSchema,
+    s.server,
+  ]);
 
   const selectedJob = rows.filter((r) => r.id === rowKey)[0] ?? null;
 
@@ -41,9 +44,9 @@ export const App = () => {
   );
 
   const updateRows = useCallback(async () => {
-    const rows = await getRows();
+    const rows = await server.getInductionJobs();
     setRows(rows);
-  }, [setRows]);
+  }, [setRows, server]);
 
   useEffect(() => {
     updateRows();
@@ -59,16 +62,20 @@ export const App = () => {
     else return s;
   };
 
+  const goToSchema = (doc: Sdf.Document) => {
+    selectSchema(doc["@id"]);
+    setPage("editor");
+  };
+
   const makeSchemaLink = (doc: Sdf.Document | null) => {
     if (doc) {
-      const usp = new URLSearchParams(window.location.hash.substring(1));
-      usp.set("page", "editor");
-      usp.set("schemaId", doc["@id"]);
-      const url = `http://${window.location.host}/#${usp.toString()}`;
       return (
-        <a href={url} target="_blank" rel="noreferrer">
+        <Button
+          onClick={() => goToSchema(doc)}
+          style={{ padding: "0 0.25rem" }}
+        >
           Go to schema
-        </a>
+        </Button>
       );
     } else return <i>Not available</i>;
   };
@@ -96,10 +103,12 @@ export const App = () => {
 
   return (
     <div id="indContent">
-      <div>
-        <Button onClick={() => setRowKey(null)} variant="success">
-          New Job
-        </Button>
+      <div id="indToolbar">
+        <div id="indToolbarButtons">
+          <Button onClick={() => setRowKey(null)} variant="success">
+            New Job
+          </Button>
+        </div>
         <span>Last Updated: {lastUpdated ?? "never"}</span>
       </div>
       <div id="indTableDiv">

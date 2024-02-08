@@ -74,10 +74,14 @@ export const DiagramContextMenu = (props: React.PropsWithChildren<{}>) => {
   );
 };
 
-const eventContextMenuSelector = makeAppSelector(["mutator"]);
+const eventContextMenuSelector = makeAppSelector([
+  "mutator",
+  "doc",
+  "loadSchema",
+]);
 
 export const Event = (props: React.PropsWithChildren<{ event: Sdf.Event }>) => {
-  const { mutator } = useAppContext(eventContextMenuSelector);
+  const { mutator, doc, loadSchema } = useAppContext(eventContextMenuSelector);
   const setConnectionStartObject = useDiagramStore(
     (s) => s.setConnectionStartObject,
   );
@@ -107,6 +111,13 @@ export const Event = (props: React.PropsWithChildren<{ event: Sdf.Event }>) => {
       ))}
     </SubMenu>
   );
+
+  const generateSubevents = () => {
+    if (doc) {
+      mutator.generateSubevents(event, doc["@id"]);
+      loadSchema();
+    }
+  };
 
   return (
     <GenericContextMenu triggerContent={props.children}>
@@ -154,6 +165,10 @@ export const Event = (props: React.PropsWithChildren<{ event: Sdf.Event }>) => {
             TA1explanation
           </Item>
         </SubMenu>
+
+        {event.children ? null : (
+          <Item onSelect={generateSubevents}>Generate subevents</Item>
+        )}
 
         <Item onSelect={() => mutator.deleteEvent(event["@id"])}>
           Remove event

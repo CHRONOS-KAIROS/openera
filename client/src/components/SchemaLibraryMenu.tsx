@@ -168,7 +168,8 @@ class SchemaLibraryMenuBase extends React.Component<Props, State> {
     this.getSelectedIds().map(async (id) => {
       let sdfFile = await this.props.server.getSchemaJSON(id);
       sdfFile = this.props.mutator.preprocessSchema(sdfFile);
-      sdfFile = await this.props.mutator.doAsyncUpdates(sdfFile);
+      const asyncUpdater = await this.props.mutator.getAsyncUpdaters(sdfFile);
+      asyncUpdater(sdfFile);
       await this.props.server.updateSchemaJSON(
         id,
         this.props.clientId,

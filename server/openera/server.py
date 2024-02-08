@@ -36,4 +36,4 @@ app = falcon.API(middleware=[util.CORSComponent()])
 """This variable must be defined as a module-level variable"""
 app.router_options.converters["uri"] = util.UriConverter
 util.create_api(app, "/api", api_dict)
-app.add_sink(resources.connector_sink, prefix="/connector")
+app.add_sink(resources.connector_sink, prefix="/api/connector")
