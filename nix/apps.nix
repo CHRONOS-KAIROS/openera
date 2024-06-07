@@ -7,6 +7,8 @@ with self.packages.${system}; {
     # npm has to create and write to some additional directories under
     # node_modules.
     program = toString (pkgs.writeScript "" ''
+      #!${pkgs.bash}/bin/bash
+      set -e
       rm -rf node_modules
       mkdir node_modules
       shopt -s dotglob
@@ -23,7 +25,7 @@ with self.packages.${system}; {
       ${self.apps.${system}.build-node-deps.program}
       export NODE_OPTIONS=--openssl-legacy-provider
       export BROWSER=none
-      npm start
+      ${pkgs.nodePackages.npm}/bin/npm start
     '');
   };
 
