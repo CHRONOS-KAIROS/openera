@@ -456,6 +456,10 @@ class ZipSchemas:
 
 
 def connector_sink(req: Any, resp: Any) -> None:
+    if "CONNECTOR_HOST" not in os.environ:
+        # If the CONNECTOR_HOST is not present, don't bother with the sink.
+        resp.status = falcon.HTTP_502
+        return
     kpc_url = f"http://{os.environ['CONNECTOR_HOST']}/"
     forward_path = "/".join(req.path.split("/")[3:])
     headers = {k: v for k, v in req.headers.items() if k.lower() in ["content-type"]}
