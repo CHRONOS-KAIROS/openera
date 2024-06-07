@@ -126,7 +126,9 @@ def _get_connection() -> sqlite3.Connection:
     """Get the per-thread preconfigured connection."""
     global _con
     if _con is None:
-        _con = sqlite3.connect(get_db_file(), timeout=DB_CONNECTION_TIMEOUT)
+        db_file = get_db_file()
+        db_file.parents[0].mkdir(exist_ok=True, parents=True)
+        _con = sqlite3.connect(db_file, timeout=DB_CONNECTION_TIMEOUT)
         _con.row_factory = sqlite3.Row
     return _con
 
